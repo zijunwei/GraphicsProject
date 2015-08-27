@@ -153,6 +153,7 @@ HCURSOR CGraphicsProjectDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+bool firstTime = true;
 
 
 void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
@@ -161,8 +162,8 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 	CFileDialog fOpenDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
 		NULL, this);
 	CStringA ImgFilePath;
-	
-
+	Invalidate();
+	UpdateWindow();
 	//char c_ImgFilePath[256];
 	CWnd *OrgImgPC;
 	CRect pictureControlRect;
@@ -176,32 +177,42 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 				_T("File Not Found"), MB_OK);
 			return;
 		}
-
-
-		// Get the ORG_IMSHOW Picture Control property
-		OrgImgPC= GetDlgItem(IDC_ORG_IMSHOW);
+		OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
 		OrgImgPC->GetWindowRect(&pictureControlRect);
 		pcWidth = pictureControlRect.Width();
 		pcHeight = pictureControlRect.Height();
-
-		// Load the image using OpenCV
 		ImgFilePath = fOpenDlg.GetPathName();
 
 		cv::Mat inputImage;
-		char*  ptr =(char *) LPCTSTR(ImgFilePath.GetBuffer());
+		char*  ptr = (char *)LPCTSTR(ImgFilePath.GetBuffer());
 		inputImage = cv::imread(ptr);
 		cv::Size pcSize_cv(pcWidth, pcHeight);
-		cv::resize(inputImage,inputImage,pcSize_cv);
+		cv::resize(inputImage, inputImage, pcSize_cv);
 
-		//Show img in OrgImgPC picture control
-		cv::namedWindow("IDC_ORG_IMSHOW", 0);
-		cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight );
+		if (firstTime) {
+			// Get the ORG_IMSHOW Picture Control property
+			//OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
+			//OrgImgPC->GetWindowRect(&pictureControlRect);
+			//pcWidth = pictureControlRect.Width();
+			//pcHeight = pictureControlRect.Height();
 
-		HWND hWnd = (HWND)cvGetWindowHandle("IDC_ORG_IMSHOW");
-		HWND hParent = ::GetParent(hWnd);
-		::SetParent(hWnd, OrgImgPC->m_hWnd);
-		::ShowWindow(hParent, SW_HIDE);
+			// Load the image using OpenCV
 
+
+			
+
+			//Show img in OrgImgPC picture control
+			cv::namedWindow("IDC_ORG_IMSHOW", 0);
+			cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight);
+
+			HWND hWnd = (HWND)cvGetWindowHandle("IDC_ORG_IMSHOW");
+			HWND hParent = ::GetParent(hWnd);
+			::SetParent(hWnd, OrgImgPC->m_hWnd);
+			::ShowWindow(hParent, SW_HIDE);
+			firstTime = false;
+		}
+
+	
 		cv::imshow("IDC_ORG_IMSHOW", inputImage);
 	}
 }
