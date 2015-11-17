@@ -22,9 +22,9 @@ std::vector<cv::Point2d> z_strokeSampling(Mat image){
 	double valueSum = cv::sum(gridMap)[0];
 	gridMap.convertTo(gridMap, CV_64FC1, 1.0 /valueSum );
 	std::vector<cv::Point2d> strokePositions;
-	for (int i = 0; i < inputImgSz.width; i += gridSz)
+	for (int i = 0; i < inputImgSz.height; i += gridSz)
 	{
-		for (int j = 0; j<inputImgSz.height; j += gridSz){
+		for (int j = 0; j<inputImgSz.width; j += gridSz){
 			int   numStrokesGrid = (int)(gridMap.at<double>( ( i / gridSz),( j / gridSz))*numStrokes) + 4; // 20 20 grid at least should have 4 10 by 30 strokes ;
 			for (int pts = 0; pts < numStrokesGrid; pts++){
 				int px = int(rand() / (double)RAND_MAX  * gridSz) + i;;

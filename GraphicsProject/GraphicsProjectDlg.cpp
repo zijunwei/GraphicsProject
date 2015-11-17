@@ -260,34 +260,13 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	cv::Mat segImg = refImg;
 	cv::Mat lab_segImg = segImg.clone();
 	
-	
-	// create segmentation:
-	int n_seg_regions = 5;
-	cvtColor(lab_segImg, lab_segImg, CV_RGB2Lab);
-	double step = sqrt(lab_segImg.cols*lab_segImg.rows / (double)n_seg_regions);
-	Slic slic;
 
-	// convert mat to iplimage:
-	IplImage* ipl_lab_segImg, *ipl_segImg;
-	ipl_lab_segImg = cvCreateImage(cvSize(lab_segImg.cols, lab_segImg.rows), 8, 3);
-	ipl_segImg = cvCreateImage(cvSize(segImg.cols, segImg.rows), 8, 3);
-	IplImage ipllab = lab_segImg;
-	IplImage iplseg = segImg;
 
-	cvCopy(&ipllab,ipl_lab_segImg );
-	cvCopy(&iplseg, ipl_segImg);
+	// image segmentation, method1
 
-	slic.generate_superpixels(&ipllab, step, n_seg_regions);
-
-	slic.create_connectivity(&iplseg);
-
-	/* Display the contours and show the result. */
-	//slic.display_contours( &iplseg, CV_RGB(255, 0, 0));
-	slic.colour_with_cluster_means(&iplseg);
-	segImg = cv::cvarrToMat(&iplseg);
+    cv::Mat seg = segmentImage1(lab_segImg);
 	cv::namedWindow("Segmentation", 0);
-	cv::imshow("Segmentation",segImg);
-
+	cv::imshow("Segmentation", seg);
 
 	cv::Mat salImg;
 
@@ -366,10 +345,6 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	}
 
 
-	// for visualizing the strokes
-	//for (int i = 0; i < pointList.size(); i++){
-	//	cv::circle(outputImg, pointList.at(i), 2, 255);
-	//}
 
 	
 

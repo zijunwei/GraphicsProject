@@ -19,4 +19,8 @@ private:
 };
 void getGradients(cv::Mat inputImg, cv::Mat &gradx, cv::Mat &grady,cv::Mat& ,cv::Mat&);
 
+
+cv::Mat segmentImage1(cv::Mat grayImg);
+cv::Mat segmentImage2(cv::Mat inputImage);
+
 #endif
