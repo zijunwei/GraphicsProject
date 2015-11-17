@@ -3,10 +3,19 @@
 //
 
 #include "stdafx.h"
+#include "z_Saliency.h"
+#include "z_strokeSampling.h"
+#include "z_imgproc.h"
+#include "myStroke.h"
+#include "slic.h"
 #include "GraphicsProject.h"
 #include "GraphicsProjectDlg.h"
 #include "afxdialogex.h"
 #include <opencv2\opencv.hpp>
+
+#include "ParamBox.h"
+#include "ParamSetting.h"
+#include "painting.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -19,15 +28,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-// Implementation
+	// Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -50,7 +59,7 @@ END_MESSAGE_MAP()
 
 
 CGraphicsProjectDlg::CGraphicsProjectDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_GRAPHICSPROJECT_DIALOG, pParent)
+: CDialogEx(IDD_GRAPHICSPROJECT_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -65,6 +74,8 @@ BEGIN_MESSAGE_MAP(CGraphicsProjectDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(ID_BT_LOAD_IMG, &CGraphicsProjectDlg::OnBnClickedBtLoadImg)
+	ON_BN_CLICKED(ID_BTN_CONV_IMG, &CGraphicsProjectDlg::OnBnClickedBtAutoShow)
+	ON_BN_CLICKED(ParamPanPopup, &CGraphicsProjectDlg::OnBnClickedParampanpopup)
 END_MESSAGE_MAP()
 
 
@@ -153,9 +164,13 @@ HCURSOR CGraphicsProjectDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-bool firstTime = true;
+// Global variables defined here for now:
+bool firstTimer_orgView = true;
+bool firstTimer_renderView = true;
+cv::Mat  globalImg;
+ParamBox params;
 
-
+// Btn Event on Load Image 
 void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 {
 	// TODO: Add your control notification handler code here
@@ -164,11 +179,10 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 	CStringA ImgFilePath;
 	Invalidate();
 	UpdateWindow();
-	//char c_ImgFilePath[256];
 	CWnd *OrgImgPC;
 	CRect pictureControlRect;
 	int pcWidth, pcHeight;
-//	char * ptr;
+	//	char * ptr;
 	if (fOpenDlg.DoModal() == IDOK)
 	{
 		if (!fOpenDlg.GetPathName())
@@ -183,13 +197,18 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 		pcHeight = pictureControlRect.Height();
 		ImgFilePath = fOpenDlg.GetPathName();
 
-		cv::Mat inputImage;
-		char*  ptr = (char *)LPCTSTR(ImgFilePath.GetBuffer());
-		inputImage = cv::imread(ptr);
-		cv::Size pcSize_cv(pcWidth, pcHeight);
-		cv::resize(inputImage, inputImage, pcSize_cv);
 
-		if (firstTime) {
+		char*  ptr = (char *)LPCTSTR(ImgFilePath.GetBuffer());
+		cv::Mat localOrgImg = cv::imread(ptr);
+		globalImg = localOrgImg;
+		if (globalImg.empty()){
+			AfxMessageBox(_T("Image to Not Loaded Successfully!"), MB_OK | MB_ICONSTOP);
+			return;
+		}
+		cv::Size pcSize_cv(pcWidth, pcHeight);
+		cv::resize(localOrgImg, localOrgImg, pcSize_cv);
+
+		if (firstTimer_orgView) {
 			// Get the ORG_IMSHOW Picture Control property
 			//OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
 			//OrgImgPC->GetWindowRect(&pictureControlRect);
@@ -197,10 +216,6 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 			//pcHeight = pictureControlRect.Height();
 
 			// Load the image using OpenCV
-
-
-			
-
 			//Show img in OrgImgPC picture control
 			cv::namedWindow("IDC_ORG_IMSHOW", 0);
 			cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight);
@@ -209,10 +224,178 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 			HWND hParent = ::GetParent(hWnd);
 			::SetParent(hWnd, OrgImgPC->m_hWnd);
 			::ShowWindow(hParent, SW_HIDE);
-			firstTime = false;
+			firstTimer_orgView = false;
 		}
 
-	
-		cv::imshow("IDC_ORG_IMSHOW", inputImage);
+
+		cv::imshow("IDC_ORG_IMSHOW", localOrgImg);
+
+
+
 	}
+}
+
+// Btn Click event on AutoShow
+void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
+{
+	// TODO: Add your control notification handler code here
+	Invalidate();
+	UpdateWindow();
+	CWnd *RenderImgPC;
+	CRect pictureControlRect;
+	int pcWidth, pcHeight;
+
+	RenderImgPC = GetDlgItem(IDC_RND_IMSHOW);
+	RenderImgPC->GetWindowRect(&pictureControlRect);
+	pcWidth = pictureControlRect.Width();
+	pcHeight = pictureControlRect.Height();
+
+
+	if (globalImg.empty()){
+		AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
+		return;
+	}
+
+	cv::Mat refImg = globalImg.clone();
+	cv::Mat segImg = refImg;
+	cv::Mat lab_segImg = segImg.clone();
+	
+	
+	// create segmentation:
+	int n_seg_regions = 5;
+	cvtColor(lab_segImg, lab_segImg, CV_RGB2Lab);
+	double step = sqrt(lab_segImg.cols*lab_segImg.rows / (double)n_seg_regions);
+	Slic slic;
+
+	// convert mat to iplimage:
+	IplImage* ipl_lab_segImg, *ipl_segImg;
+	ipl_lab_segImg = cvCreateImage(cvSize(lab_segImg.cols, lab_segImg.rows), 8, 3);
+	ipl_segImg = cvCreateImage(cvSize(segImg.cols, segImg.rows), 8, 3);
+	IplImage ipllab = lab_segImg;
+	IplImage iplseg = segImg;
+
+	cvCopy(&ipllab,ipl_lab_segImg );
+	cvCopy(&iplseg, ipl_segImg);
+
+	slic.generate_superpixels(&ipllab, step, n_seg_regions);
+
+	slic.create_connectivity(&iplseg);
+
+	/* Display the contours and show the result. */
+	//slic.display_contours( &iplseg, CV_RGB(255, 0, 0));
+	slic.colour_with_cluster_means(&iplseg);
+	segImg = cv::cvarrToMat(&iplseg);
+	cv::namedWindow("Segmentation", 0);
+	cv::imshow("Segmentation",segImg);
+
+
+	cv::Mat salImg;
+
+
+	if (!z_Saliency(refImg, salImg)){
+		AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
+		return;
+	}
+
+	//cv::Size pcSize_cv(pcWidth, pcHeight);
+	//cv::resize(outputImg, outputImg, pcSize_cv);
+
+	// non-uniformily sample on outputImg 
+	// idea. for each grid of sized 20 by 20; we assign a fixed number based on ratio.
+	std::vector<cv::Point2d>pointList = z_strokeSampling(salImg);
+	imgStats outputImgStats;
+	outputImgStats.imgStatsInit(refImg);
+
+
+	// create stroke structure.
+	std::vector<myStroke> mySTrokes;
+	for (int i = 0; i < pointList.size(); i++){
+		myStroke tmp;
+		tmp.stroke_location = pointList.at(i);
+		tmp.stroke_grad_orientation = outputImgStats.grad_orientation.at<double>((int) tmp.stroke_location.y, (int)tmp.stroke_location.x);
+		tmp.stroke_grad_magnitude = outputImgStats.grad_magnitude.at<double>((int)tmp.stroke_location.y, (int)tmp.stroke_location.x);
+	}
+
+	//get the in a m*n  dummy way
+	//This is probelmatic!!!
+	for (int i = 0; i < mySTrokes.size(); i++){
+		double dist1 = INFINITY, dist2 = INFINITY, dist3 = INFINITY, dist4 = INFINITY;
+		myStroke curStroke = mySTrokes.at(i);
+		for (int j = 0; j < mySTrokes.size(); j++){
+			if (j == i){
+			continue;
+			}
+			double difx = mySTrokes.at(j).stroke_location.x - curStroke.stroke_location.x;
+			double dify = mySTrokes.at(j).stroke_location.y - curStroke.stroke_location.y;
+			double dist = sqrt( pow(difx, 2) + pow(dify, 2));
+			// now decide which Quadrant current method within
+
+			double x = 1;
+			double y = curStroke.stroke_grad_orientation;
+			double projLength = sqrt(pow(x, 2) + pow(y, 2));
+			double rectified_dif_x = (difx *x + dify*y) / projLength;
+			double rectified_dif_y = (difx*(-y) + dify*x) / projLength;
+			double rectified_dist = sqrt(pow(rectified_dif_x, 2) + pow(rectified_dif_y, 2));
+			// selected different quadrant:
+			// q1
+			if (rectified_dif_x>0 && rectified_dif_y>0 && rectified_dist<dist1)
+			{
+				dist1 = rectified_dist;
+				curStroke.neighbourStrokes[1] = mySTrokes.at(j);
+			}
+			//q2
+			if (rectified_dif_x<0 && rectified_dif_y > 0 && rectified_dist < dist2)
+			{
+				dist2 = rectified_dist;
+				curStroke.neighbourStrokes[2] = mySTrokes.at(j);
+			}
+			//q3
+			if (rectified_dif_x<0 && rectified_dif_y < 0 && rectified_dist < dist3)
+			{
+				dist3 = rectified_dist;
+				curStroke.neighbourStrokes[3] = mySTrokes.at(j);
+			}
+			if (rectified_dif_x > 0 && rectified_dif_y < 0 && rectified_dist < dist4)
+			{
+				dist4 = rectified_dist;
+				curStroke.neighbourStrokes[4] = mySTrokes.at(j);
+			}
+
+		}
+	
+	}
+
+
+	// for visualizing the strokes
+	//for (int i = 0; i < pointList.size(); i++){
+	//	cv::circle(outputImg, pointList.at(i), 2, 255);
+	//}
+
+	
+
+
+	// TODO: Do all the processing here!
+	if (firstTimer_renderView) {
+
+		cv::namedWindow("IDC_RND_IMSHOW", 0);
+		cv::resizeWindow("IDC_RND_IMSHOW", pcWidth, pcHeight);
+
+		HWND hWnd = (HWND)cvGetWindowHandle("IDC_RND_IMSHOW");
+		HWND hParent = ::GetParent(hWnd);
+		::SetParent(hWnd, RenderImgPC->m_hWnd);
+		::ShowWindow(hParent, SW_HIDE);
+		firstTimer_renderView = false;
+	}
+
+
+	cv::imshow("IDC_RND_IMSHOW", salImg);
+	
+}
+
+//Pop Up the Paramter Setting Dialog
+void CGraphicsProjectDlg::OnBnClickedParampanpopup()
+{
+	// TODO: Add your control notification handler code here
+	ParamSetting psDialg;
+	psDialg.DoModal();
 }

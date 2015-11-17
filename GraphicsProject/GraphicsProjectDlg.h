@@ -33,4 +33,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedBtLoadImg();
+	afx_msg void OnBnClickedBtAutoShow();
+	afx_msg void OnBnClickedParampanpopup();
 };
