@@ -10,10 +10,18 @@ class myStroke;
 class myStroke
 {
 public:
-	cv::Point2d stroke_location;
+	cv::Point2i stroke_location;
 	double stroke_grad_orientation;
 	double stroke_grad_magnitude;
-	myStroke * neighbourStrokes;
+	cv::Vec3d rgbColor;
+	cv::Vec2d strokeSize;
+	// neighbor strokes in 4 qudratants.
+	myStroke * NeiStrokeQ1;
+	myStroke * NeiStrokeQ2;
+	myStroke * NeiStrokeQ3;
+	myStroke * NeiStrokeQ4;
+
+
 protected:
 private:
 };

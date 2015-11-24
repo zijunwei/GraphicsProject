@@ -201,10 +201,14 @@
     <ClInclude Include="ParamBox.h" />
     <ClInclude Include="ParamSetting.h" />
     <ClInclude Include="precomp.h" />
+    <ClInclude Include="ReactionDiffusion.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="slic.h" />
+    <ClInclude Include="SLIC_superpixels.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="strokeProcess.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="vis.h" />
     <ClInclude Include="z_imgproc.h" />
     <ClInclude Include="z_Saliency.h" />
     <ClInclude Include="z_strokeSampling.h" />
@@ -217,12 +221,15 @@
     <ClCompile Include="ParamBox.cpp" />
     <ClCompile Include="ParamSetting.cpp" />
     <ClCompile Include="slic.cpp" />
+    <ClCompile Include="SLIC_superpixels.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="strokeProcess.cpp" />
+    <ClCompile Include="vis.cpp" />
     <ClCompile Include="z_imgproc.cpp" />
     <ClCompile Include="z_Saliency.cpp" />
     <ClCompile Include="z_strokeSampling.cpp" />

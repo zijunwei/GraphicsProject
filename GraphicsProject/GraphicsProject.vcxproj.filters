@@ -60,6 +60,18 @@
     <ClInclude Include="slic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReactionDiffusion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SLIC_superpixels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strokeProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsProject.cpp">
@@ -93,6 +105,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="slic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SLIC_superpixels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strokeProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

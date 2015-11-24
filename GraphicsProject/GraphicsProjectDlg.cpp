@@ -8,6 +8,10 @@
 #include "z_imgproc.h"
 #include "myStroke.h"
 #include "slic.h"
+#include "SLIC_superpixels.h"
+#include "strokeProcess.h"
+#include "vis.h"
+
 #include "GraphicsProject.h"
 #include "GraphicsProjectDlg.h"
 #include "afxdialogex.h"
@@ -208,27 +212,27 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 		cv::Size pcSize_cv(pcWidth, pcHeight);
 		cv::resize(localOrgImg, localOrgImg, pcSize_cv);
 
-		if (firstTimer_orgView) {
-			// Get the ORG_IMSHOW Picture Control property
-			//OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
-			//OrgImgPC->GetWindowRect(&pictureControlRect);
-			//pcWidth = pictureControlRect.Width();
-			//pcHeight = pictureControlRect.Height();
+		//if (firstTimer_orgView) {
+		//	// Get the ORG_IMSHOW Picture Control property
+		//	//OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
+		//	//OrgImgPC->GetWindowRect(&pictureControlRect);
+		//	//pcWidth = pictureControlRect.Width();
+		//	//pcHeight = pictureControlRect.Height();
 
-			// Load the image using OpenCV
-			//Show img in OrgImgPC picture control
-			cv::namedWindow("IDC_ORG_IMSHOW", 0);
-			cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight);
+		//	// Load the image using OpenCV
+		//	//Show img in OrgImgPC picture control
+		//	cv::namedWindow("IDC_ORG_IMSHOW", 0);
+		//	cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight);
 
-			HWND hWnd = (HWND)cvGetWindowHandle("IDC_ORG_IMSHOW");
-			HWND hParent = ::GetParent(hWnd);
-			::SetParent(hWnd, OrgImgPC->m_hWnd);
-			::ShowWindow(hParent, SW_HIDE);
-			firstTimer_orgView = false;
-		}
+		//	HWND hWnd = (HWND)cvGetWindowHandle("IDC_ORG_IMSHOW");
+		//	HWND hParent = ::GetParent(hWnd);
+		//	::SetParent(hWnd, OrgImgPC->m_hWnd);
+		//	::ShowWindow(hParent, SW_HIDE);
+		//	firstTimer_orgView = false;
+		//}
 
-
-		cv::imshow("IDC_ORG_IMSHOW", localOrgImg);
+		cv::namedWindow("original image viewer", 0);
+		cv::imshow("original image viewer", localOrgImg);
 
 
 
@@ -257,16 +261,22 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	}
 
 	cv::Mat refImg = globalImg.clone();
-	cv::Mat segImg = refImg;
-	cv::Mat lab_segImg = segImg.clone();
+	cv::Mat segImg = refImg.clone();
+	//cv::Mat lab_segImg = segImg.clone();
 	
 
 
-	// image segmentation, method1
 
-    cv::Mat seg = segmentImage1(lab_segImg);
-	cv::namedWindow("Segmentation", 0);
-	cv::imshow("Segmentation", seg);
+
+
+	// This part needs to be working in debugging model, 
+	SLICSuperpixel slic(segImg, 100);
+	slic.generateSuperPixels();
+	Mat segMask = slic.getClustersIndex();
+
+	//Mat result = slic.recolor();
+	//cv::namedWindow("Segmentation", 0);
+	//cv::imshow("Segmentation", result);
 
 	cv::Mat salImg;
 
@@ -287,83 +297,41 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 
 
 	// create stroke structure.
-	std::vector<myStroke> mySTrokes;
+	std::vector<myStroke> myStrokes;
 	for (int i = 0; i < pointList.size(); i++){
 		myStroke tmp;
 		tmp.stroke_location = pointList.at(i);
 		tmp.stroke_grad_orientation = outputImgStats.grad_orientation.at<double>((int) tmp.stroke_location.y, (int)tmp.stroke_location.x);
 		tmp.stroke_grad_magnitude = outputImgStats.grad_magnitude.at<double>((int)tmp.stroke_location.y, (int)tmp.stroke_location.x);
+		myStrokes.push_back(tmp);
 	}
 
-	//get the in a m*n  dummy way
-	//This is probelmatic!!!
-	for (int i = 0; i < mySTrokes.size(); i++){
-		double dist1 = INFINITY, dist2 = INFINITY, dist3 = INFINITY, dist4 = INFINITY;
-		myStroke curStroke = mySTrokes.at(i);
-		for (int j = 0; j < mySTrokes.size(); j++){
-			if (j == i){
-			continue;
-			}
-			double difx = mySTrokes.at(j).stroke_location.x - curStroke.stroke_location.x;
-			double dify = mySTrokes.at(j).stroke_location.y - curStroke.stroke_location.y;
-			double dist = sqrt( pow(difx, 2) + pow(dify, 2));
-			// now decide which Quadrant current method within
 
-			double x = 1;
-			double y = curStroke.stroke_grad_orientation;
-			double projLength = sqrt(pow(x, 2) + pow(y, 2));
-			double rectified_dif_x = (difx *x + dify*y) / projLength;
-			double rectified_dif_y = (difx*(-y) + dify*x) / projLength;
-			double rectified_dist = sqrt(pow(rectified_dif_x, 2) + pow(rectified_dif_y, 2));
-			// selected different quadrant:
-			// q1
-			if (rectified_dif_x>0 && rectified_dif_y>0 && rectified_dist<dist1)
-			{
-				dist1 = rectified_dist;
-				curStroke.neighbourStrokes[1] = mySTrokes.at(j);
-			}
-			//q2
-			if (rectified_dif_x<0 && rectified_dif_y > 0 && rectified_dist < dist2)
-			{
-				dist2 = rectified_dist;
-				curStroke.neighbourStrokes[2] = mySTrokes.at(j);
-			}
-			//q3
-			if (rectified_dif_x<0 && rectified_dif_y < 0 && rectified_dist < dist3)
-			{
-				dist3 = rectified_dist;
-				curStroke.neighbourStrokes[3] = mySTrokes.at(j);
-			}
-			if (rectified_dif_x > 0 && rectified_dif_y < 0 && rectified_dist < dist4)
-			{
-				dist4 = rectified_dist;
-				curStroke.neighbourStrokes[4] = mySTrokes.at(j);
-			}
+	initStrokeGraph(myStrokes, segMask);
 
-		}
-	
-	}
+	vis_StrokeAll(refImg, myStrokes);
+
 
 
 
 	
 
 
-	// TODO: Do all the processing here!
-	if (firstTimer_renderView) {
+	//// TODO: This is used to dock everything into the frame
+	//if (firstTimer_renderView) {
 
-		cv::namedWindow("IDC_RND_IMSHOW", 0);
-		cv::resizeWindow("IDC_RND_IMSHOW", pcWidth, pcHeight);
+	//	cv::namedWindow("IDC_RND_IMSHOW", 0);
+	//	cv::resizeWindow("IDC_RND_IMSHOW", pcWidth, pcHeight);
 
-		HWND hWnd = (HWND)cvGetWindowHandle("IDC_RND_IMSHOW");
-		HWND hParent = ::GetParent(hWnd);
-		::SetParent(hWnd, RenderImgPC->m_hWnd);
-		::ShowWindow(hParent, SW_HIDE);
-		firstTimer_renderView = false;
-	}
+	//	HWND hWnd = (HWND)cvGetWindowHandle("IDC_RND_IMSHOW");
+	//	HWND hParent = ::GetParent(hWnd);
+	//	::SetParent(hWnd, RenderImgPC->m_hWnd);
+	//	::ShowWindow(hParent, SW_HIDE);
+	//	firstTimer_renderView = false;
+	//}
 
 
-	cv::imshow("IDC_RND_IMSHOW", salImg);
+	//cv::imshow("IDC_RND_IMSHOW", salImg);
 	
 }
 
