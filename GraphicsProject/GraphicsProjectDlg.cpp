@@ -11,6 +11,10 @@
 #include "SLIC_superpixels.h"
 #include "strokeProcess.h"
 #include "vis.h"
+#include "ReactionDiffusion.h"
+#include "myBrushes.h"
+#include "colorspace.h"
+#include "ComponetTests.h"
 
 #include "GraphicsProject.h"
 #include "GraphicsProjectDlg.h"
@@ -204,7 +208,7 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 
 		char*  ptr = (char *)LPCTSTR(ImgFilePath.GetBuffer());
 		cv::Mat localOrgImg = cv::imread(ptr);
-		globalImg = localOrgImg;
+		globalImg = localOrgImg.clone();
 		if (globalImg.empty()){
 			AfxMessageBox(_T("Image to Not Loaded Successfully!"), MB_OK | MB_ICONSTOP);
 			return;
@@ -234,6 +238,9 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 		cv::namedWindow("original image viewer", 0);
 		cv::imshow("original image viewer", localOrgImg);
 
+		//Test1: view all brushes...
+		//myBrushes brushes;
+		//brushes.visBrushes();
 
 
 	}
@@ -261,60 +268,88 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	}
 
 	cv::Mat refImg = globalImg.clone();
-	cv::Mat segImg = refImg.clone();
-	//cv::Mat lab_segImg = segImg.clone();
-	
 
 
 
-
-
-	// This part needs to be working in debugging model, 
-	SLICSuperpixel slic(segImg, 100);
+	//////////////////////////////////////////////////////////////////////
+	///////////// Compute super pixels for potential segmentation ////////
+	//////////////////////////////////////////////////////////////////////
+	SLICSuperpixel slic(refImg, 10);
 	slic.generateSuperPixels();
 	Mat segMask = slic.getClustersIndex();
+	Mat segMaskShow = slic.recolor();
+	cv::namedWindow("Segmentation", 0);
+	cv::imshow("Segmentation", segMaskShow);
 
-	//Mat result = slic.recolor();
-	//cv::namedWindow("Segmentation", 0);
-	//cv::imshow("Segmentation", result);
 
+
+	//////////////////////////////////////////////////////////////////////
+	///////////// Compute Image Saliencies ////////
+	//////////////////////////////////////////////////////////////////////
 	cv::Mat salImg;
-
-
 	if (!z_Saliency(refImg, salImg)){
 		AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
 		return;
 	}
+	cv::namedWindow("Saliency", 0);
+	cv::imshow("Saliency", salImg);
 
-	//cv::Size pcSize_cv(pcWidth, pcHeight);
-	//cv::resize(outputImg, outputImg, pcSize_cv);
 
-	// non-uniformily sample on outputImg 
+
+	// non-uniformly sample on outputImg 
 	// idea. for each grid of sized 20 by 20; we assign a fixed number based on ratio.
-	std::vector<cv::Point2d>pointList = z_strokeSampling(salImg);
-	imgStats outputImgStats;
-	outputImgStats.imgStatsInit(refImg);
+	std::vector<cv::Point2i>pointList = z_strokeSampling(salImg);
+	vis_StrokePositions(refImg, pointList);
+	imgStats outputImgStats(refImg);
+	outputImgStats.getGradients();
 
-
-	// create stroke structure.
-	std::vector<myStroke> myStrokes;
+	// create stroke structure. myStrokes 
+	std::vector<myStroke>  refStrokes;
 	for (int i = 0; i < pointList.size(); i++){
 		myStroke tmp;
 		tmp.stroke_location = pointList.at(i);
-		tmp.stroke_grad_orientation = outputImgStats.grad_orientation.at<double>((int) tmp.stroke_location.y, (int)tmp.stroke_location.x);
-		tmp.stroke_grad_magnitude = outputImgStats.grad_magnitude.at<double>((int)tmp.stroke_location.y, (int)tmp.stroke_location.x);
-		myStrokes.push_back(tmp);
+		tmp.stroke_grad = cv::Point2d(outputImgStats.grad_x.at<double>(tmp.stroke_location.y, tmp.stroke_location.x), outputImgStats.grad_y.at<double>(tmp.stroke_location.y, tmp.stroke_location.x));
+		tmp.stroke_grad_orientation = outputImgStats.grad_orientation_in_degree.at<double>(tmp.stroke_location.y, tmp.stroke_location.x);
+		refStrokes.push_back(tmp);
 	}
 
 
-	initStrokeGraph(myStrokes, segMask);
-
-	vis_StrokeAll(refImg, myStrokes);
-
+	connectStrokeGraph(refStrokes, segMask);
+	cv::Mat vis_init_stroke_graph = vis_StrokeAll(refImg, refStrokes);
 
 
+	cv::namedWindow("initial stroke graph", 0);
+	cv::imshow("initial stroke graph", vis_init_stroke_graph);
+	//update orientation using reaction diffusion:
 
-	
+	updateOrientation(refStrokes);
+
+	connectStrokeGraph(refStrokes, segMask);
+	//re-initialize the stroke graph after iteration
+
+	cv::Mat vis_1stiter_stroke_graph = vis_StrokeAll(refImg, refStrokes);
+	cv::namedWindow("updated stroke graph", 0);
+	cv::imshow("updated stroke graph", vis_1stiter_stroke_graph);
+	initStrokeSize(refStrokes, salImg);
+	updateSize(refStrokes);
+	initStrokeColor(refStrokes, refImg);
+
+	//t_LCHColorSpace(refStrokes);
+
+	updateColor(refStrokes);
+
+	// draw the image out ...
+	placeBrush(refImg, refStrokes);
+
+	cv::namedWindow("results", 0);
+	cv::imshow("results", refImg);
+
+
+
+
+
+
+
 
 
 	//// TODO: This is used to dock everything into the frame
@@ -331,8 +366,8 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	//}
 
 
-	//cv::imshow("IDC_RND_IMSHOW", salImg);
-	
+	//cv::imshow("IDC_RND_IMSHOW", salImg); 
+
 }
 
 //Pop Up the Paramter Setting Dialog

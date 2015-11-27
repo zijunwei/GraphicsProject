@@ -194,8 +194,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="colorspace.h" />
+    <ClInclude Include="ComponetTests.h" />
     <ClInclude Include="GraphicsProject.h" />
     <ClInclude Include="GraphicsProjectDlg.h" />
+    <ClInclude Include="myBrushes.h" />
     <ClInclude Include="myStroke.h" />
     <ClInclude Include="painting.h" />
     <ClInclude Include="ParamBox.h" />
@@ -208,18 +211,23 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="strokeProcess.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="vis.h" />
     <ClInclude Include="z_imgproc.h" />
     <ClInclude Include="z_Saliency.h" />
     <ClInclude Include="z_strokeSampling.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="colorspace.cpp" />
+    <ClCompile Include="ComponetTests.cpp" />
     <ClCompile Include="GraphicsProject.cpp" />
     <ClCompile Include="GraphicsProjectDlg.cpp" />
+    <ClCompile Include="myBrushes.cpp" />
     <ClCompile Include="myStroke.cpp" />
     <ClCompile Include="painting.cpp" />
     <ClCompile Include="ParamBox.cpp" />
     <ClCompile Include="ParamSetting.cpp" />
+    <ClCompile Include="ReactionDiffusion.cpp" />
     <ClCompile Include="slic.cpp" />
     <ClCompile Include="SLIC_superpixels.cpp" />
     <ClCompile Include="stdafx.cpp">

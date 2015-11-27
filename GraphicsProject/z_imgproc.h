@@ -9,18 +9,19 @@
 class imgStats
 {
 public: 
+
 	cv::Mat grad_x;
 	cv::Mat grad_y;
-	cv::Mat grad_orientation;
-	cv::Mat grad_magnitude;
-	void imgStatsInit(cv::Mat inputImg);
+	cv::Mat grad_orientation_in_degree; // degree of gradient orientation in range [0 ~ 2pi]
+	cv::Mat curImg;
+	imgStats();
+	imgStats(cv::Mat inputImg);
+	void getGradients(void);
+	void getGradOrientationInDegree();
 protected:
 private:
+
 };
-void getGradients(cv::Mat inputImg, cv::Mat &gradx, cv::Mat &grady,cv::Mat& ,cv::Mat&);
 
-
-//cv::Mat segmentImage1(cv::Mat grayImg);
-//cv::Mat segmentImage2(cv::Mat inputImage);
 
 #endif

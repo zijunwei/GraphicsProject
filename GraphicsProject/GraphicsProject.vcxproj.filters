@@ -72,6 +72,18 @@
     <ClInclude Include="strokeProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="myBrushes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="colorspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponetTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsProject.cpp">
@@ -114,6 +126,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="strokeProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ReactionDiffusion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="myBrushes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="colorspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponetTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,34 +5,42 @@
 #include "z_imgproc.h"
 using namespace cv;
 using namespace std;
-void getGradients(Mat inputArray, Mat  & grad_x, Mat & grad_y, Mat & grad_magnitude, Mat & grad_orientation){
 
-	cvtColor(inputArray, inputArray, CV_RGB2GRAY);
+
+void imgStats::getGradients(void){
+
+
+      cv::Mat grayImg;
+	cvtColor(this->curImg, grayImg, CV_RGB2GRAY);
 	
-	 grad_magnitude = cv::Mat::zeros(inputArray.rows, inputArray.cols, CV_64FC1);
-	 grad_orientation = cv::Mat::zeros(inputArray.rows, inputArray.cols, CV_64FC1);
+	 //grad_magnitude = cv::Mat::zeros(inputArray.rows, inputArray.cols, CV_64FC1);
+	 //grad_orientation = cv::Mat::zeros(inputArray.rows, inputArray.cols, CV_64FC1);
 
-	 cv::Sobel(inputArray, grad_x, CV_64FC1, 1, 0, 3);
-	 cv::Sobel(inputArray, grad_y, CV_64FC1, 0, 1, 3);
+	// may be gaussian blur is needed:
 
-	
-	for (int i = 0; i < grad_x.rows; i++){
-		for (int j = 0; j < grad_x.cols; j++){
-			grad_magnitude.at<double>(i, j) =  sqrt( pow(grad_x.at<double>(i, j), 2) + pow(grad_y.at<double>(i, j), 2));
-			grad_orientation.at<double>(i, j) = atan2(grad_y.at<double>(i, j), grad_x.at<double>(i, j));
+	 cv::Sobel(grayImg, grad_x, CV_64FC1, 1, 0, 3);
+	 cv::Sobel(grayImg, grad_y, CV_64FC1, 0, 1, 3);
+	 
+	 cv::phase(grad_x, grad_y, grad_orientation_in_degree);
+	//for (int i = 0; i < grad_x.rows; i++){
+	//	for (int j = 0; j < grad_x.cols; j++){
+	//		grad_magnitude.at<double>(i, j) =  sqrt( pow(grad_x.at<double>(i, j), 2) + pow(grad_y.at<double>(i, j), 2));
+	//		grad_orientation.at<double>(i, j) = atan2(grad_y.at<double>(i, j), grad_x.at<double>(i, j));
 
-		
-		}
-	}
+	//	
+	//	}
+	//}
 
 
 
 }
 
-void imgStats::imgStatsInit(Mat inputImg){
+ imgStats::imgStats(Mat inputImg){
 	
-	getGradients(inputImg, this->grad_x, this->grad_y, this->grad_magnitude, this->grad_orientation);
-
+	this->curImg = inputImg.clone();
+	this->grad_x = cv::Mat::zeros(inputImg.rows, inputImg.cols, CV_64FC1);
+	this->grad_y = cv::Mat::zeros(inputImg.rows, inputImg.cols, CV_64FC1);
+	this->grad_orientation_in_degree = cv::Mat::zeros(inputImg.rows, inputImg.cols, CV_64FC1);
 }
 
 //cv::Mat segmentImage1(cv::Mat src){

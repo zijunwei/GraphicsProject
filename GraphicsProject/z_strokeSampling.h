@@ -5,6 +5,6 @@
 #include <opencv2/core/persistence.hpp>
 #include "opencv2/imgproc.hpp"
 
-std::vector<cv::Point2d> z_strokeSampling(cv::Mat image);
+std::vector<cv::Point2i> z_strokeSampling(cv::Mat image);
 
 #endif
