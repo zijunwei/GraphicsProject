@@ -57,13 +57,7 @@
     <ClInclude Include="myStroke.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="slic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vis.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReactionDiffusion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SLIC_superpixels.h">
@@ -116,9 +110,6 @@
     <ClCompile Include="myStroke.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="slic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="vis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,9 +117,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="strokeProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReactionDiffusion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="myBrushes.cpp">

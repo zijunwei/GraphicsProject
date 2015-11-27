@@ -204,9 +204,7 @@
     <ClInclude Include="ParamBox.h" />
     <ClInclude Include="ParamSetting.h" />
     <ClInclude Include="precomp.h" />
-    <ClInclude Include="ReactionDiffusion.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="slic.h" />
     <ClInclude Include="SLIC_superpixels.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="strokeProcess.h" />
@@ -227,8 +225,6 @@
     <ClCompile Include="painting.cpp" />
     <ClCompile Include="ParamBox.cpp" />
     <ClCompile Include="ParamSetting.cpp" />
-    <ClCompile Include="ReactionDiffusion.cpp" />
-    <ClCompile Include="slic.cpp" />
     <ClCompile Include="SLIC_superpixels.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
