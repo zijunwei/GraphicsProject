@@ -42,9 +42,6 @@
     <ClInclude Include="painting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="precomp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="z_Saliency.h">
       <Filter>Header Files</Filter>
     </ClInclude>

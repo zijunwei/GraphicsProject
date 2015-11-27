@@ -203,7 +203,6 @@
     <ClInclude Include="painting.h" />
     <ClInclude Include="ParamBox.h" />
     <ClInclude Include="ParamSetting.h" />
-    <ClInclude Include="precomp.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SLIC_superpixels.h" />
     <ClInclude Include="stdafx.h" />
