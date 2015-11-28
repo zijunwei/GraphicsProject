@@ -3,11 +3,11 @@
 //
 
 #include "stdafx.h"
-#include "z_Saliency.h"
+#include "computeSaliency.h"
 #include "z_strokeSampling.h"
-#include "z_imgproc.h"
+//#include "z_imgproc.h"
 #include "myStroke.h"
-#include "SLIC_superpixels.h"
+//#include "SLIC_superpixels.h"
 #include "strokeProcess.h"
 #include "vis.h"
 #include "myBrushes.h"
@@ -16,14 +16,14 @@
 #include "GraphicsProject.h"
 #include "GraphicsProjectDlg.h"
 #include "afxdialogex.h"
-#include <opencv2\opencv.hpp>
-
-#include "ParamBox.h"
-#include "ParamSetting.h"
 #include "painting.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+//Variables that are used by all these methods:
+
 
 
 // CAboutDlg dialog used for App About
@@ -80,7 +80,6 @@ BEGIN_MESSAGE_MAP(CGraphicsProjectDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(ID_BT_LOAD_IMG, &CGraphicsProjectDlg::OnBnClickedBtLoadImg)
 	ON_BN_CLICKED(ID_BTN_CONV_IMG, &CGraphicsProjectDlg::OnBnClickedBtAutoShow)
-	ON_BN_CLICKED(ParamPanPopup, &CGraphicsProjectDlg::OnBnClickedParampanpopup)
 END_MESSAGE_MAP()
 
 
@@ -116,6 +115,7 @@ BOOL CGraphicsProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+    
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -169,11 +169,8 @@ HCURSOR CGraphicsProjectDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-// Global variables defined here for now:
-bool firstTimer_orgView = true;
-bool firstTimer_renderView = true;
-cv::Mat  globalImg;
-ParamBox params;
+
+
 
 // Btn Event on Load Image 
 void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
@@ -184,10 +181,7 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 	CStringA ImgFilePath;
 	Invalidate();
 	UpdateWindow();
-	CWnd *OrgImgPC;
-	CRect pictureControlRect;
-	int pcWidth, pcHeight;
-	//	char * ptr;
+	
 	if (fOpenDlg.DoModal() == IDOK)
 	{
 		if (!fOpenDlg.GetPathName())
@@ -196,50 +190,17 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 				_T("File Not Found"), MB_OK);
 			return;
 		}
-		OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
-		OrgImgPC->GetWindowRect(&pictureControlRect);
-		pcWidth = pictureControlRect.Width();
-		pcHeight = pictureControlRect.Height();
+		
 		ImgFilePath = fOpenDlg.GetPathName();
-
-
 		char*  ptr = (char *)LPCTSTR(ImgFilePath.GetBuffer());
-		cv::Mat localOrgImg = cv::imread(ptr);
-		globalImg = localOrgImg.clone();
-		if (globalImg.empty()){
-			AfxMessageBox(_T("Image to Not Loaded Successfully!"), MB_OK | MB_ICONSTOP);
+		cv::Mat OrgImg = cv::imread(ptr);
+		if (OrgImg.empty()|| OrgImg.channels()!=3){
+			AfxMessageBox(_T("Image is Non-Existent or Non-Color"), MB_OK | MB_ICONSTOP);
 			return;
 		}
-		cv::Size pcSize_cv(pcWidth, pcHeight);
-		cv::resize(localOrgImg, localOrgImg, pcSize_cv);
-
-		//if (firstTimer_orgView) {
-		//	// Get the ORG_IMSHOW Picture Control property
-		//	//OrgImgPC = GetDlgItem(IDC_ORG_IMSHOW);
-		//	//OrgImgPC->GetWindowRect(&pictureControlRect);
-		//	//pcWidth = pictureControlRect.Width();
-		//	//pcHeight = pictureControlRect.Height();
-
-		//	// Load the image using OpenCV
-		//	//Show img in OrgImgPC picture control
-		//	cv::namedWindow("IDC_ORG_IMSHOW", 0);
-		//	cv::resizeWindow("IDC_ORG_IMSHOW", pcWidth, pcHeight);
-
-		//	HWND hWnd = (HWND)cvGetWindowHandle("IDC_ORG_IMSHOW");
-		//	HWND hParent = ::GetParent(hWnd);
-		//	::SetParent(hWnd, OrgImgPC->m_hWnd);
-		//	::ShowWindow(hParent, SW_HIDE);
-		//	firstTimer_orgView = false;
-		//}
-
-		cv::namedWindow("original image viewer", 0);
-		cv::imshow("original image viewer", localOrgImg);
-
-		//Test1: view all brushes...
-		//myBrushes brushes;
-		//brushes.visBrushes();
-
-
+		Images.setOriginalImage(OrgImg);
+		State.imgData = &Images;
+		
 	}
 }
 
@@ -249,97 +210,96 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	// TODO: Add your control notification handler code here
 	Invalidate();
 	UpdateWindow();
-	CWnd *RenderImgPC;
-	CRect pictureControlRect;
-	int pcWidth, pcHeight;
-
-	RenderImgPC = GetDlgItem(IDC_RND_IMSHOW);
-	RenderImgPC->GetWindowRect(&pictureControlRect);
-	pcWidth = pictureControlRect.Width();
-	pcHeight = pictureControlRect.Height();
+	
+	State.updateState(Params);
+	//visualize the final results:
+	//placeBrush(refImg, refStrokes);
 
 
-	if (globalImg.empty()){
-		AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
-		return;
-	}
-
-	cv::Mat refImg = globalImg.clone();
+	
 
 
+	//if (globalImg.empty()){
+	//	AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
+	//	return;
+	//}
 
-	//////////////////////////////////////////////////////////////////////
-	///////////// Compute super pixels for potential segmentation ////////
-	//////////////////////////////////////////////////////////////////////
-	SLICSuperpixel slic(refImg, 10);
-	slic.generateSuperPixels();
-	Mat segMask = slic.getClustersIndex();
-	Mat segMaskShow = slic.recolor();
-	cv::namedWindow("Segmentation", 0);
-	cv::imshow("Segmentation", segMaskShow);
+	//cv::Mat refImg = globalImg.clone();
 
 
 
-	//////////////////////////////////////////////////////////////////////
-	///////////// Compute Image Saliencies ////////
-	//////////////////////////////////////////////////////////////////////
-	cv::Mat salImg;
-	if (!z_Saliency(refImg, salImg)){
-		AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
-		return;
-	}
-	cv::namedWindow("Saliency", 0);
-	cv::imshow("Saliency", salImg);
+	////////////////////////////////////////////////////////////////////////
+	/////////////// Compute super pixels for potential segmentation ////////
+	////////////////////////////////////////////////////////////////////////
+	//SLICSuperpixel slic(refImg, 10);
+	//slic.generateSuperPixels();
+	//Mat segMask = slic.getClustersIndex();
+	//Mat segMaskShow = slic.recolor();
+	//cv::namedWindow("Segmentation", 0);
+	//cv::imshow("Segmentation", segMaskShow);
+
+
+
+	////////////////////////////////////////////////////////////////////////
+	/////////////// Compute Image Saliencies ////////
+	////////////////////////////////////////////////////////////////////////
+	//cv::Mat salImg;
+	//if (!z_Saliency(refImg, salImg)){
+	//	AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
+	//	return;
+	//}
+	//cv::namedWindow("Saliency", 0);
+	//cv::imshow("Saliency", salImg);
 
 
 
 	// non-uniformly sample on outputImg 
 	// idea. for each grid of sized 20 by 20; we assign a fixed number based on ratio.
-	std::vector<cv::Point2i>pointList = z_strokeSampling(salImg);
-	vis_StrokePositions(refImg, pointList);
-	imgStats outputImgStats(refImg);
-	outputImgStats.getGradients();
+	//std::vector<cv::Point2i>pointList = z_strokeSampling(salImg);
+	//vis_StrokePositions(refImg, pointList);
+	//imgStats outputImgStats(refImg);
+	//outputImgStats.getGradients();
 
 	// create stroke structure. myStrokes 
-	std::vector<myStroke>  refStrokes;
-	for (int i = 0; i < pointList.size(); i++){
-		myStroke tmp;
-		tmp.stroke_location = pointList.at(i);
-		tmp.stroke_grad = cv::Point2d(outputImgStats.grad_x.at<double>(tmp.stroke_location.y, tmp.stroke_location.x), outputImgStats.grad_y.at<double>(tmp.stroke_location.y, tmp.stroke_location.x));
-		tmp.stroke_grad_orientation = outputImgStats.grad_orientation_in_degree.at<double>(tmp.stroke_location.y, tmp.stroke_location.x);
-		refStrokes.push_back(tmp);
-	}
+	//std::vector<myStroke>  refStrokes;
+	//for (int i = 0; i < pointList.size(); i++){
+	//	myStroke tmp;
+	//	tmp.stroke_location = pointList.at(i);
+	//	tmp.stroke_grad = cv::Point2d(outputImgStats.grad_x.at<double>(tmp.stroke_location.y, tmp.stroke_location.x), outputImgStats.grad_y.at<double>(tmp.stroke_location.y, tmp.stroke_location.x));
+	//	tmp.stroke_grad_orientation = outputImgStats.grad_orientation_in_degree.at<double>(tmp.stroke_location.y, tmp.stroke_location.x);
+	//	refStrokes.push_back(tmp);
+	//}
 
 
-	connectStrokeGraph(refStrokes, segMask);
-	cv::Mat vis_init_stroke_graph = vis_StrokeAll(refImg, refStrokes);
+	//connectStrokeGraph(refStrokes, segMask);
+	//cv::Mat vis_init_stroke_graph = vis_StrokeAll(refImg, refStrokes);
 
 
-	cv::namedWindow("initial stroke graph", 0);
-	cv::imshow("initial stroke graph", vis_init_stroke_graph);
-	//update orientation using reaction diffusion:
+	//cv::namedWindow("initial stroke graph", 0);
+	//cv::imshow("initial stroke graph", vis_init_stroke_graph);
+	////update orientation using reaction diffusion:
 
-	updateOrientation(refStrokes);
+	//updateOrientation(refStrokes);
 
-	connectStrokeGraph(refStrokes, segMask);
-	//re-initialize the stroke graph after iteration
+	//connectStrokeGraph(refStrokes, segMask);
+	////re-initialize the stroke graph after iteration
 
-	cv::Mat vis_1stiter_stroke_graph = vis_StrokeAll(refImg, refStrokes);
-	cv::namedWindow("updated stroke graph", 0);
-	cv::imshow("updated stroke graph", vis_1stiter_stroke_graph);
-	initStrokeSize(refStrokes, salImg);
-	updateSize(refStrokes);
-	initStrokeColor(refStrokes, refImg);
+	//cv::Mat vis_1stiter_stroke_graph = vis_StrokeAll(refImg, refStrokes);
+	//cv::namedWindow("updated stroke graph", 0);
+	//cv::imshow("updated stroke graph", vis_1stiter_stroke_graph);
+	//initStrokeSize(refStrokes, salImg);
+	//updateSize(refStrokes);
+	//initStrokeColor(refStrokes, refImg);
 
-	//t_LCHColorSpace(refStrokes);
+	////t_LCHColorSpace(refStrokes);
 
-	updateColor(refStrokes);
+	//updateColor(refStrokes);
 
-	// draw the image out ...
-	placeBrush(refImg, refStrokes);
+	//// draw the image out ...
+	//placeBrush(refImg, refStrokes);
 
-	cv::namedWindow("results", 0);
-	cv::imshow("results", refImg);
+	//cv::namedWindow("results", 0);
+	//cv::imshow("results", refImg);
 
 
 
@@ -368,9 +328,9 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 }
 
 //Pop Up the Paramter Setting Dialog
-void CGraphicsProjectDlg::OnBnClickedParampanpopup()
-{
-	// TODO: Add your control notification handler code here
-	ParamSetting psDialg;
-	psDialg.DoModal();
-}
+//void CGraphicsProjectDlg::OnBnClickedParampanpopup()
+//{
+//	// TODO: Add your control notification handler code here
+//	ParamSetting psDialg;
+//	psDialg.DoModal();
+//}

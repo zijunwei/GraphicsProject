@@ -4,7 +4,9 @@
 
 #pragma once
 
-
+#include "ParamBox.h"
+#include "ImageData.h"
+#include "StrokeProcessState.h"
 // CGraphicsProjectDlg dialog
 class CGraphicsProjectDlg : public CDialogEx
 {
@@ -35,4 +37,10 @@ public:
 	afx_msg void OnBnClickedBtLoadImg();
 	afx_msg void OnBnClickedBtAutoShow();
 	afx_msg void OnBnClickedParampanpopup();
+
+//data used:  images and parameters	
+private:
+	ImageData Images;
+    ParamBox Params;
+	StrokeProcessState State;
 };

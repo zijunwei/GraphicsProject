@@ -42,13 +42,7 @@
     <ClInclude Include="painting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="z_Saliency.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="z_strokeSampling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="z_imgproc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="myStroke.h">
@@ -75,6 +69,15 @@
     <ClInclude Include="ComponetTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ImageData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="computeSaliency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StrokeProcessState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsProject.cpp">
@@ -95,13 +98,7 @@
     <ClCompile Include="painting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="z_Saliency.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="z_strokeSampling.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="z_imgproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="myStroke.cpp">
@@ -123,6 +120,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponetTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="computeSaliency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StrokeProcessState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
