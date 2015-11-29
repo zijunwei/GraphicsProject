@@ -3,6 +3,10 @@
 
 #define PI         3.14159265358979323846
 #define NUMBER_OF_SUPERPIXELS 10
+#define HALF_STROKE_SIZE 5
+//Image Scale Range:
+double MaxBrushScale = 2;
+double MinBrushScale = 1;
 
 
 #define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
@@ -17,5 +21,7 @@
 #define LAMBDA_COLOR              0.005    //attribute process for stroke size: size contrast
 #define COLOR_RANDOM_RANGE         0.005    //attribute process for stroke size: control the range of random number for size randomness 
 #define N_ITERATION_COLOR          100      //number of iterations for stroke process size 
+
+
 
 #endif /* defined(UTILS_H) */

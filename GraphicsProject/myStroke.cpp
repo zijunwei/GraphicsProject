@@ -14,7 +14,7 @@ myStroke::myStroke(){
 }
 
 //Compute gradient magnitude 
-double myStroke::getGradMag(){
-	return   sqrt(pow(this->stroke_grad.x, 2) + pow(this->stroke_grad.y, 2));
-}
+//double myStroke::getGradMag(){
+//	return   sqrt(pow(this->stroke_grad.x, 2) + pow(this->stroke_grad.y, 2));
+//}
 

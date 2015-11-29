@@ -7,13 +7,20 @@
 #include <vector>
 #include "myStroke.h"
 void connectStrokeGraph(std::vector <myStroke> & StrokeList, cv::Mat segMask);
-void initStrokeOrientation(std::vector<myStroke>& StrokeList, cv::Mat salImg);
+void initStrokeOrientation(std::vector<myStroke>& StrokeList, const cv::Mat & GradImage);
 void initStrokeColor(std::vector <myStroke> & StrokeList, cv::Mat refImg);
-void initStrokeSize(std::vector<myStroke> &,cv::Mat );
+void initStrokeSize(const cv::Mat & ,  std::vector<myStroke> & , double  );
 
 
-void updateOrientation(std::vector<myStroke> & myStrokes);
-void updateSize(std::vector<myStroke> & myStrokes);
-void updateColor(std::vector<myStroke> & myStrokes);
+void updateOrientation(std::vector<myStroke> & myStrokes,double);
+void updateSize(std::vector<myStroke> & myStrokes,double);
+
+//split it into 3 components individually
+void updateColor(std::vector<myStroke> & myStrokes,double);
+
+void updateLightness(std::vector<myStroke> & myStrokes, double);
+void updateChroma(std::vector<myStroke> & myStrokes, double);
+void updateHue(std::vector<myStroke> & myStrokes, double);
+
 
 #endif /* defined(STROKE_PROCESS_H) */

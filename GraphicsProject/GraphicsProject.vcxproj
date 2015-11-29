@@ -201,6 +201,7 @@
     <ClInclude Include="ImageData.h" />
     <ClInclude Include="myBrushes.h" />
     <ClInclude Include="myStroke.h" />
+    <ClInclude Include="NUS.h" />
     <ClInclude Include="painting.h" />
     <ClInclude Include="ParamBox.h" />
     <ClInclude Include="ParamSetting.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="myBrushes.cpp" />
     <ClCompile Include="myStroke.cpp" />
+    <ClCompile Include="NUS.cpp" />
     <ClCompile Include="painting.cpp" />
     <ClCompile Include="ParamBox.cpp" />
     <ClCompile Include="ParamSetting.cpp" />

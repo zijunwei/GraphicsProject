@@ -7,6 +7,6 @@
 #include "opencv2/highgui.hpp"
 #include "myStroke.h"
 #include <vector>
-void vis_StrokePositions(cv::Mat inputImage, std::vector<cv::Point2i> strokePositions);
+void vis_StrokePositions(cv::Mat inputImage, std::vector<myStroke> StrokeList);
 cv::Mat vis_StrokeAll(cv::Mat inputImage, std::vector<myStroke> myStrokes);
 #endif

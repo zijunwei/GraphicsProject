@@ -1,21 +1,19 @@
 #include "stdafx.h"
 #include "z_strokeSampling.h"
-using namespace cv;
-std::vector<cv::Point2i> z_strokeSampling(Mat image){
+//using namespace cv;
+std::vector<cv::Point2i> z_strokeSampling(cv::Mat image){
 	int gridSz = 20;
 	int numStrokes = 200;
-	Size inputImgSz = image.size();
-	Size gridMapSz =  inputImgSz   / gridSz + Size(1, 1) ;
+	cv::Size inputImgSz = image.size();
+	//Size gridMapSz =  inputImgSz   / gridSz + Size(1, 1) ;
+	//cv::Size gridMapSz = inputImgSz / gridSz + Size(1, 1);
+	cv::Size gridMapSz = cv::Size(  ceil( inputImgSz.width/gridSz) ,ceil(inputImgSz.height/gridSz)  );
 
 
-	Mat gridMap;
-	resize(image, gridMap, gridMapSz);
+	cv::Mat gridMap;
+	cv::resize(image, gridMap, gridMapSz);
 
-	// convert to gray
-	if (gridMap.channels() == 3)
-	{
-		cvtColor(gridMap, gridMap, cv::COLOR_BGR2GRAY);
-	}
+	
 
 
 	//normalize to 0 to 1

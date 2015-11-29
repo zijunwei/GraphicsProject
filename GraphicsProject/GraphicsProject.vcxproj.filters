@@ -78,6 +78,9 @@
     <ClInclude Include="StrokeProcessState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NUS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsProject.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StrokeProcessState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NUS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

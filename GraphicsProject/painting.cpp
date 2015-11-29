@@ -5,40 +5,7 @@
 #include "myBrushes.h"
 #include <stdio.h>
 
-//const int numBrushes = 6;
-//const char *  brushPath = "brush\\mask%d.png";
-//cv::Mat painting::brushParams::loadBrush(int brushNumber){
-//
-//	char imgpath[256];
-//	sprintf_s(imgpath, brushPath, brushNumber);
-//	cv::Mat mask = cv::imread(imgpath);
-//	
-//	if (DEBUGSHOW){
-//		//cv::namedWindow("brush display window");              // Create a window for display.
-//		cv::imshow("Display window", mask);                   // Show our image inside it.
-//		//cv::waitKey(0);                                       // Wait for a keystroke in the window
-//	
-//	}
-//
-//	// resize to a small size:
-//
-//	cv::resize(mask, mask, cv::Size(W, H));
-//	return mask;
-//
-//		
-//}
-//
-//void painting::randomPlace(cv::Mat &Canvans, int num_brushes){
-//
-//	for (int i = 0; i < num_brushes; i++){
-//	
-//		// generate random brushes 
-//		//place them on Canvans
-//	
-//	}
-//
-//
-//}
+
 
 void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList)
 {
@@ -55,29 +22,29 @@ void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList)
 
 		//add color:
 		double B, G, R;
-		Lch2Rgb(&R, &G, &B, curStroke->lchColor(0), curStroke->lchColor(1), curStroke->lchColor(2)*180/PI);
+		Lch2Rgb(&R, &G, &B, curStroke->ColorLightness, curStroke->ColorChroma, curStroke->ColorHue*180/PI);
 		cv::Vec3b bgrColor((int)(B*255), (int) (G*255),(int)(R*255));
 		
 
 
 		//change size:
-		if (curStroke->strokeSize(0)<1)
+		if (curStroke->StrokeScale(0)<1)
 		{
-			curStroke->strokeSize(0) = 30;
+			curStroke->StrokeScale(0) = 30;
 		}
-		if (curStroke->strokeSize(1) < 1)
+		if (curStroke->StrokeScale(1) < 1)
 		{
-			curStroke->strokeSize(1) = 10;
+			curStroke->StrokeScale(1) = 10;
 		}
 
-		cv::resize(brushModel, brushModel, cv::Size((int)(curStroke->strokeSize(1)), (int)(curStroke->strokeSize(0))));
+		cv::resize(brushModel, brushModel, cv::Size((int)(curStroke->StrokeScale(1)), (int)(curStroke->StrokeScale(0))));
 
 
 		//rotate by an angle:
 		cv::Point2i brushCenter((int)brushModel.cols / 2, (int)brushModel.rows / 2);
-		cv::Mat rot = cv::getRotationMatrix2D(brushCenter, curStroke->stroke_grad_orientation * 180 / PI, 1.0);
+		cv::Mat rot = cv::getRotationMatrix2D(brushCenter, curStroke->GradientOrientation * 180 / PI, 1.0);
 
-		cv::Rect bbox = cv::RotatedRect(brushCenter, brushModel.size(), curStroke->stroke_grad_orientation * 180 / PI).boundingRect();
+		cv::Rect bbox = cv::RotatedRect(brushCenter, brushModel.size(), curStroke->GradientOrientation * 180 / PI).boundingRect();
 
 		rot.at<double>(0, 2) += bbox.width / 2.0 - brushCenter.x;
 		rot.at<double>(1, 2) += bbox.height / 2.0 - brushCenter.y;
@@ -104,7 +71,7 @@ void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList)
 		brushCenter.y = (int)brushModel.rows / 2;
 		double blend_ratio = 0.5;
 
-		cv::Point2i CanvansLocation = curStroke->stroke_location;
+		cv::Point2i CanvansLocation = curStroke->StrokeLocation;
 		for (int i = 0; i < brushModel.cols; i++){
 			for (int j = 0; j < brushModel.rows;j++)
 		   { 

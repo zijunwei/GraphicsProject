@@ -12,18 +12,21 @@ public:
 
 	// Don't directly use default constructors
 	myStroke();
-	cv::Point2d stroke_grad;
-	cv::Point2i stroke_location;
-	double stroke_grad_orientation;
-	cv::Vec3b rgbColor; // uint8 format BGR
+	//cv::Point2d stroke_grad;
+	cv::Point2i StrokeLocation;
+	double GradientOrientation;
+	//cv::Vec3b rgbColor; // uint8 format BGR
 	cv::Vec3d lchColor;
-	cv::Vec2d strokeSize;
+	double ColorLightness;
+	double ColorChroma;
+	double ColorHue;
+	cv::Vec2f StrokeScale;
 	// neighbor strokes in 4 quadrants.
 	myStroke * NeiStrokeQ1;
 	myStroke * NeiStrokeQ2;
 	myStroke * NeiStrokeQ3;
 	myStroke * NeiStrokeQ4;
-	double getGradMag();
+	//double getGradMag();
 
 protected:
 private:
