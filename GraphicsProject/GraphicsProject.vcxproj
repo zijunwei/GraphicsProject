@@ -195,7 +195,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="colorspace.h" />
-    <ClInclude Include="ComponetTests.h" />
     <ClInclude Include="GraphicsProject.h" />
     <ClInclude Include="GraphicsProjectDlg.h" />
     <ClInclude Include="ImageData.h" />
@@ -218,7 +217,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="colorspace.cpp" />
-    <ClCompile Include="ComponetTests.cpp" />
     <ClCompile Include="GraphicsProject.cpp" />
     <ClCompile Include="GraphicsProjectDlg.cpp" />
     <ClCompile Include="ImageData.cpp" />

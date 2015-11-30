@@ -12,5 +12,6 @@ public :
 	cv::Mat SegmentImage;
 	cv::Mat SegmentImage_color;
 	cv::Mat GradientOrientation;
+	cv::Mat GradientRatio;  // Gradient Dx/Dy
 };
 

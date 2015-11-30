@@ -105,7 +105,7 @@ void connectStrokeGraph(std::vector <myStroke> & StrokeList, cv::Mat segMask){
 
 
 
-void initStrokeSize(const cv::Mat  & saliencyImage, std::vector<myStroke> & StrokeList, double mCoarseness)
+void initStrokeSize(const cv::Mat  & saliencyImage, const cv::Mat & gradientRatio, std::vector<myStroke> & StrokeList, double mCoarseness)
 {
 	double minSaliency = INFINITY;
 	//first of all decide the minimal size would be (10,30);
@@ -121,7 +121,25 @@ void initStrokeSize(const cv::Mat  & saliencyImage, std::vector<myStroke> & Stro
 	minSaliency = 1 - exp(-1 * pow(minSaliency, 2));
 	for (int i = 0; i < StrokeList.size(); i++)
 	{
-		StrokeList.at(i).StrokeScale = cv::Vec2f(1.0, 1.0)*mCoarseness;
+
+		float dx, dy;
+		if (gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x)<=1 )
+		{
+			dx = 1 /gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+			dy = 1;
+		}
+		if (gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) > 1)
+		{
+			dx = 1 ;
+			dy = 1 *  gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+		}
+
+		//Set the constraint
+		dx > MaxRation ? MaxRation : dx;
+		dy > MaxRation ? MaxRation : dy;
+		
+
+		StrokeList.at(i).StrokeScale = cv::Vec2f(dx, dy)*mCoarseness;
 		float curSaliency = saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
 		StrokeList.at(i).StrokeScale = StrokeList.at(i).StrokeScale  *  minSaliency*5 / (1 - exp(-1 * pow(curSaliency, 0.5)));
 
@@ -210,7 +228,6 @@ void updateSize(std::vector<myStroke> & myStrokes,double mSizeContrast)
 	for (int iStroke = 0; iStroke < myStrokes.size(); iStroke++){
 		for (int iter = 0; iter < N_ITERATION_SIZE; iter++){
 
-			//step 1 compute D(theta)
 			double D_sx = 0;
 			double D_sy = 0;
 			if (myStrokes.at(iStroke).NeiStrokeQ1){

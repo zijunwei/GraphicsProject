@@ -39,7 +39,7 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, Param
 		for (int j = 0; j < SaliencyImage.rows; j++)
 		{
 			float s = SaliencyImage.at<float>(j, i);
-			SampleProb.at<float>(j, i) = (float) 1 - exp(-pow((s / Params->mNon_Uniformity), Params->mDensity));
+			SampleProb.at<float>(j, i) = (float) (1 -  exp(-pow((s / Params->mNon_Uniformity), Params->mDensity)));
 		}
 	}
 	//create stroke map on first run, if 
@@ -63,7 +63,8 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, Param
 
 	//sort from High saliency to Low saliency: Something Like NMS,
 	std::vector<int> SortedScores(SaliencyScores.size());
-	std::size_t n(0);
+	//std::size_t n(0);
+	int n=0;
 	std::generate(std::begin(SortedScores), std::end(SortedScores), [&]{ return n++; });
 
 	std::sort(std::begin(SortedScores),
@@ -73,9 +74,15 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, Param
 	REORDER(*StrokeList, SortedScores);
 
 	//from END to TOP, delete Strokes if within radius..
-	for ( int i = StrokeList->size()-1; i > 0;i--)
+
+	//int sizeStrokeList = 0;
+	//for (size_t it = 0; it <StrokeList->size(); it++){
+	//	sizeStrokeList++;
+	//}
+
+	for ( size_t i =  StrokeList->size() -1; i > 0;i--)
 	{
-		for (int j = 0; j < i;j++)
+		for (size_t j = 0; j < i;j++)
 		{
 			if (IfOverlap(StrokeList->at( (i) ).StrokeLocation,StrokeList->at((j)).StrokeLocation ))
 			{

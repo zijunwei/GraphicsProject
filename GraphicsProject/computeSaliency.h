@@ -6,6 +6,6 @@
 #include "opencv2/imgproc.hpp"
 
 bool computeSaliency(cv::InputArray image,cv:: OutputArray saliencyMap);
-void computeGraidentOrientation(cv::Mat inputImage, cv::Mat & outputGradientOrientation);
+void computeGraidentOrientation(cv::Mat inputImage, cv::Mat & outputGradientOrientation, cv::Mat & outputGradientRatio);
 #endif
 

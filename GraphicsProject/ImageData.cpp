@@ -29,8 +29,8 @@ BOOL ImageData::setOriginalImage(cv::Mat inputImage)
 	//Saliency image:
 	computeSaliency(this->OriginalImage, this->SaliencyImage);
 
-	//Compute Gradient orientation
-	computeGraidentOrientation(this->OriginalImage, this->GradientOrientation);
+	//Compute Gradient orientation and Gradient ratio
+	computeGraidentOrientation(this->OriginalImage, this->GradientOrientation, this->GradientRatio);
 	return TRUE;
 
 

@@ -5,9 +5,9 @@
 #define NUMBER_OF_SUPERPIXELS 10
 #define HALF_STROKE_SIZE 5
 //Image Scale Range:
-double MaxBrushScale = 2;
-double MinBrushScale = 1;
-
+#define MaxBrushScale  2
+#define MinBrushScale  1
+#define MaxRation  5
 
 #define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
 #define LAMBDA_THETA               0.005    //attribute process for stroke orientation: local isotropy

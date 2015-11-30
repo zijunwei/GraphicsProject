@@ -9,7 +9,7 @@
 void connectStrokeGraph(std::vector <myStroke> & StrokeList, cv::Mat segMask);
 void initStrokeOrientation(std::vector<myStroke>& StrokeList, const cv::Mat & GradImage);
 void initStrokeColor(std::vector <myStroke> & StrokeList, cv::Mat refImg);
-void initStrokeSize(const cv::Mat & ,  std::vector<myStroke> & , double  );
+void initStrokeSize(const cv::Mat & , const cv::Mat &,  std::vector<myStroke> & , double  );
 
 
 void updateOrientation(std::vector<myStroke> & myStrokes,double);

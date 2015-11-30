@@ -71,7 +71,7 @@ bool computeSaliency(cv::InputArray image, cv::OutputArray saliencyMap){
 
 }
 
-void computeGraidentOrientation(cv::Mat inputImage, cv::Mat & outputGradientOrientation)
+void computeGraidentOrientation(cv::Mat inputImage, cv::Mat & outputGradientOrientation, cv::Mat & outputGradientRatio)
 {
 	cv::Mat grayImg;
 	cvtColor(inputImage, grayImg, CV_RGB2GRAY);
@@ -80,6 +80,9 @@ void computeGraidentOrientation(cv::Mat inputImage, cv::Mat & outputGradientOrie
 	cv::Sobel(grayImg, grad_x, CV_64FC1, 1, 0, 3);
 	cv::Sobel(grayImg, grad_y, CV_64FC1, 0, 1, 3);
 	cv::phase(grad_x, grad_y, outputGradientOrientation);
-
+	//possible errors divide by zeros
+	cv::Mat regGradY;
+	cv::add(grad_y, cv::Scalar(0.001), regGradY);
+	cv::divide(abs(grad_x), regGradY,outputGradientRatio);
 }
 

@@ -30,16 +30,17 @@ void StrokeProcessState::updateState(ParamBox input)
 		vis_StrokePositions(this->imgData->OriginalImage, this->StrokeList);
 		laterUpdate_graph = true;
 	}
-	if (curParam.mCoarseness!=prevParam.mCoarseness || laterUpdate_graph)  // reinitialize the size 
-	{
-		initStrokeSize(this->imgData->SaliencyImage, (this->StrokeList),  this->curParam.mCoarseness);
-		laterUpdate_size = true;
-	}
+	
 	if (curParam.mLocal_Iostropy != prevParam.mLocal_Iostropy || laterUpdate_graph) // update connection graph
 	{
 		updateOrientation(this->StrokeList, this->curParam.mLocal_Iostropy);
 		connectStrokeGraph(StrokeList, this->imgData->SegmentImage);
 		laterUpdate_graph = true;
+	}
+	if (curParam.mCoarseness != prevParam.mCoarseness || laterUpdate_graph)  // reinitialize the size 
+	{
+		initStrokeSize(this->imgData->SaliencyImage, this->imgData->GradientRatio, (this->StrokeList), this->curParam.mCoarseness);
+		laterUpdate_size = true;
 	}
 	if (curParam.mSize_Contrast!=prevParam.mSize_Contrast || laterUpdate_graph || laterUpdate_size) //update size 
 	{
@@ -48,15 +49,17 @@ void StrokeProcessState::updateState(ParamBox input)
 
 	if (curParam.mHue_Constrast != prevParam.mHue_Constrast ||laterUpdate_graph ) //update the three color channels separately
 	{
-
+		updateHue(StrokeList,curParam.mHue_Constrast);
 	}
 
 	if (curParam.mLightness_Contrast != prevParam.mLightness_Contrast ||laterUpdate_graph) //update the three color channels separately
 	{
+		updateLightness(StrokeList, curParam.mLightness_Contrast);
 	}
 
 	if (curParam.mChroma_Constrast != prevParam.mChroma_Constrast ||laterUpdate_graph) //update the three color channels separately
 	{
+		updateChroma(StrokeList, curParam.mChroma_Constrast);
 	}
 
 
