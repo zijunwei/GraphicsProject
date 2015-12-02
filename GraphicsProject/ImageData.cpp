@@ -24,7 +24,7 @@ BOOL ImageData::setOriginalImage(cv::Mat inputImage)
 	SLICSuperpixel slic(OriginalImage, NUMBER_OF_SUPERPIXELS);
 	slic.generateSuperPixels();
 	this->SegmentImage = slic.getClustersIndex();
-	this->SegmentImage_color = slic.recolor();
+	this->SegmentImage_color = slic.recolor2(this->OriginalImage);
 	
 	//Saliency image:
 	computeSaliency(this->OriginalImage, this->SaliencyImage);
@@ -35,3 +35,18 @@ BOOL ImageData::setOriginalImage(cv::Mat inputImage)
 
 
 }
+
+
+void ImageData::visImageData()
+{
+	
+	ShowSingleImage(WindowPropertyDisplayImage::CaptionOriginalImage, this->OriginalImage,
+		WindowPropertyDisplayImage::ColOffset,WindowPropertyDisplayImage::RowOffset);
+	ShowSingleImage(WindowPropertyDisplayImage::CaptionSaliencyImage, this->SaliencyImage,
+		WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*2+this->OriginalImage.rows);
+	ShowSingleImage(WindowPropertyDisplayImage::CaptionSegmentationImage, this->SegmentImage_color,
+		WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*3 + this->OriginalImage.rows + this->SaliencyImage.rows);
+
+	
+}
+

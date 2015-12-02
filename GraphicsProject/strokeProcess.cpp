@@ -107,42 +107,54 @@ void connectStrokeGraph(std::vector <myStroke> & StrokeList, cv::Mat segMask){
 
 void initStrokeSize(const cv::Mat  & saliencyImage, const cv::Mat & gradientRatio, std::vector<myStroke> & StrokeList, double mCoarseness)
 {
-	double minSaliency = INFINITY;
+	float minSaliency = 100;
+	float maxSaliency = 0;
+	//for debug use, try to find max saliency.
+
 	//first of all decide the minimal size would be (10,30);
 	for (int i = 0; i < StrokeList.size(); i++)
 	{
-		double unitSaliency = saliencyImage.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+		float unitSaliency = saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
 		if ((unitSaliency) < minSaliency)
 		{
 			minSaliency = (unitSaliency);
 		}
+		if (unitSaliency>maxSaliency)
+		{
+			maxSaliency = unitSaliency;
+		}
 	}
 
-	minSaliency = 1 - exp(-1 * pow(minSaliency, 2));
+
 	for (int i = 0; i < StrokeList.size(); i++)
 	{
 
-		float dx, dy;
-		if (gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x)<=1 )
+		double dx, dy;
+		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) <= 1)
 		{
-			dx = 1 /gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+			dx = 1 / gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
 			dy = 1;
 		}
-		if (gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) > 1)
+		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) > 1)
 		{
-			dx = 1 ;
-			dy = 1 *  gradientRatio.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+			dx = 1;
+			dy = 1 * gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
 		}
 
+		double curSaliency =(double) saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+		if (curSaliency < 0.01)
+		{
+			curSaliency = 0.01;
+		}
+		dx  *=  maxSaliency / curSaliency;
+		dy  *= maxSaliency / curSaliency;
 		//Set the constraint
-		dx > MaxRation ? MaxRation : dx;
-		dy > MaxRation ? MaxRation : dy;
-		
+		if (dx > Coarseness::maxScale) {dx = Coarseness::maxScale; }
+		if (dy > Coarseness::maxScale) {dy = Coarseness::maxScale; }
 
-		StrokeList.at(i).StrokeScale = cv::Vec2f(dx, dy)*mCoarseness;
-		float curSaliency = saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
-		StrokeList.at(i).StrokeScale = StrokeList.at(i).StrokeScale  *  minSaliency*5 / (1 - exp(-1 * pow(curSaliency, 0.5)));
-
+		float x = (float)dx;
+		float y = (float)dy;
+		StrokeList.at(i).StrokeScale =  cv::Vec2f(x, y)*mCoarseness;
 	}
 	//Debug to find the max and min
 	minSaliency = 0;
@@ -167,12 +179,12 @@ void initStrokeColor(std::vector <myStroke> & StrokeList, cv::Mat refImg){
 
 }
 
-void initStrokeOrientation(std::vector<myStroke>& StrokeList,const cv::Mat  &GradImage)
+void initStrokeOrientation(std::vector<myStroke>& StrokeList, const cv::Mat  &GradImage)
 {//todo this is used to move everything about initializing point locations here
 	for (int i = 0; i < StrokeList.size(); i++)
 	{
 		StrokeList.at(i).GradientOrientation =
-		GradImage.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+			GradImage.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
 	}
 }
 
@@ -180,7 +192,7 @@ void initStrokeOrientation(std::vector<myStroke>& StrokeList,const cv::Mat  &Gra
 
 
 void updateOrientation(std::vector<myStroke> & myStrokes, double mLocal_Iostropy){
-	
+
 	std::vector<myStroke>refStrokes = myStrokes;
 
 	for (int n = 0; n < myStrokes.size(); n++){
@@ -222,7 +234,7 @@ void updateOrientation(std::vector<myStroke> & myStrokes, double mLocal_Iostropy
 
 }
 
-void updateSize(std::vector<myStroke> & myStrokes,double mSizeContrast)
+void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 {
 	std::vector<myStroke>  refStrokes = myStrokes;
 	for (int iStroke = 0; iStroke < myStrokes.size(); iStroke++){
@@ -268,14 +280,14 @@ void updateSize(std::vector<myStroke> & myStrokes,double mSizeContrast)
 			double random_num_x = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 			double random_num_y = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 
-			myStrokes.at(iStroke).StrokeScale(0) = myStrokes.at(iStroke).StrokeScale(0) + R_sx + mSizeContrast * D_sx + SIZE_RANDOM_RANGE* random_num_x;
-			myStrokes.at(iStroke).StrokeScale(1) = myStrokes.at(iStroke).StrokeScale(1) + R_sy + mSizeContrast * D_sy + SIZE_RANDOM_RANGE* random_num_y;
+			myStrokes.at(iStroke).StrokeScale(0) = (float)(myStrokes.at(iStroke).StrokeScale(0) + R_sx + mSizeContrast * D_sx + SIZE_RANDOM_RANGE* random_num_x);
+			myStrokes.at(iStroke).StrokeScale(1) = (float)(myStrokes.at(iStroke).StrokeScale(1) + R_sy + mSizeContrast * D_sy + SIZE_RANDOM_RANGE* random_num_y);
 		}
 
 	}
 
 	// refine StrokeSize to be in range [minBrushScale, maxBrushScale]
-	for (int i = 0; i < myStrokes.size();i++)
+	for (int i = 0; i < myStrokes.size(); i++)
 	{
 		if (myStrokes.at(i).StrokeScale(0)>MaxBrushScale)
 		{
@@ -380,9 +392,9 @@ void updateColor(std::vector<myStroke> & myStrokes){
 
 void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContrast)
 {
-	
+
 	std::vector<double>refLightness;
-	for (int i = 0; i < StrokeList.size();i++)
+	for (int i = 0; i < StrokeList.size(); i++)
 	{
 		refLightness.push_back(StrokeList.at(i).ColorLightness);
 	}
@@ -391,13 +403,13 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 
 			//step 1 compute D(theta)
 			double D_cl = 0;
-			
+
 			if (StrokeList.at(n).NeiStrokeQ1){
 				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ1->StrokeLocation);
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ1->ColorLightness - StrokeList.at(n).ColorLightness);
-		
+
 				D_cl += 1 / dist * diff_color_l;
-				
+
 			}
 			if (StrokeList.at(n).NeiStrokeQ2){
 				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ2->StrokeLocation);
@@ -405,7 +417,7 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 
 
 				D_cl += 1 / dist * diff_color_l;
-				
+
 
 			}
 			if (StrokeList.at(n).NeiStrokeQ3){
@@ -413,7 +425,7 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ3->ColorLightness - StrokeList.at(n).ColorLightness);
 
 				D_cl += 1 / dist * diff_color_l;
-				
+
 
 			}
 			if (StrokeList.at(n).NeiStrokeQ4){
@@ -494,49 +506,49 @@ void updateHue(std::vector<myStroke> & myStrokes, double mHueContrast)
 		for (int i = 0; i < N_ITERATION_COLOR; i++){
 
 			//step 1 compute D(theta)
-		
+
 			double D_ch = 0;
 			if (myStrokes.at(n).NeiStrokeQ1){
 				double dist = cv::norm(myStrokes.at(n).StrokeLocation - myStrokes.at(n).NeiStrokeQ1->StrokeLocation);
-	
+
 				double diff_color_h = sin(myStrokes.at(n).NeiStrokeQ1->ColorHue - myStrokes.at(n).ColorHue);
 
-				
+
 				D_ch += 1 / dist * diff_color_h;
 			}
 			if (myStrokes.at(n).NeiStrokeQ2){
 				double dist = cv::norm(myStrokes.at(n).StrokeLocation - myStrokes.at(n).NeiStrokeQ2->StrokeLocation);
-				
+
 				double diff_color_h = sin(myStrokes.at(n).NeiStrokeQ2->ColorHue - myStrokes.at(n).ColorHue);
 
-			
+
 				D_ch += 1 / dist * diff_color_h;
 
 			}
 			if (myStrokes.at(n).NeiStrokeQ3){
 				double dist = cv::norm(myStrokes.at(n).StrokeLocation - myStrokes.at(n).NeiStrokeQ3->StrokeLocation);
-			
+
 				double diff_color_h = sin(myStrokes.at(n).NeiStrokeQ3->ColorHue - myStrokes.at(n).ColorHue);
 
-				
+
 				D_ch += 1 / dist * diff_color_h;
 
 			}
 			if (myStrokes.at(n).NeiStrokeQ4){
 				double dist = cv::norm(myStrokes.at(n).StrokeLocation - myStrokes.at(n).NeiStrokeQ4->StrokeLocation);
-				
+
 				double diff_color_h = sin(myStrokes.at(n).NeiStrokeQ4->ColorHue - myStrokes.at(n).ColorHue);
 
 				D_ch += 1 / dist * diff_color_h;
 
 			}
 
-			
+
 			double R_ch = 0;
-			
+
 			R_ch = sin(refStrokes.at(n).ColorHue - myStrokes.at(n).ColorHue);
 
-			
+
 			double random_num_b = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 
 			myStrokes.at(n).ColorHue = myStrokes.at(n).ColorHue + R_ch + mHueContrast * D_ch + COLOR_RANDOM_RANGE * random_num_b;

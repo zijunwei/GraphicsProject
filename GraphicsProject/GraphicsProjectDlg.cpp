@@ -5,9 +5,7 @@
 #include "stdafx.h"
 #include "computeSaliency.h"
 #include "z_strokeSampling.h"
-//#include "z_imgproc.h"
 #include "myStroke.h"
-//#include "SLIC_superpixels.h"
 #include "strokeProcess.h"
 #include "vis.h"
 #include "myBrushes.h"
@@ -17,6 +15,8 @@
 #include "GraphicsProjectDlg.h"
 #include "afxdialogex.h"
 #include "painting.h"
+#include "utils.h"
+#include "NUS.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -72,6 +72,14 @@ CGraphicsProjectDlg::CGraphicsProjectDlg(CWnd* pParent /*=NULL*/)
 void CGraphicsProjectDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_SLIDER_DENSITY, BarDensity);
+	DDX_Control(pDX, IDC_SLIDER_NU, BarNonUnif);
+	DDX_Control(pDX, IDC_SLIDER_LI, BarLocalIsotropy);
+	DDX_Control(pDX, IDC_SLIDER_COARSENESS, BarCoarseness);
+	DDX_Control(pDX, IDC_SLIDER_SC, BarSizeContrast);
+	DDX_Control(pDX, IDC_SLIDER_LIGHTNESS, BarLightness);
+	DDX_Control(pDX, IDC_SLIDER_CHROMA, BarChroma);
+	DDX_Control(pDX, IDC_SLIDER_HUE, BarHue);
 }
 
 BEGIN_MESSAGE_MAP(CGraphicsProjectDlg, CDialogEx)
@@ -80,10 +88,18 @@ BEGIN_MESSAGE_MAP(CGraphicsProjectDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(ID_BT_LOAD_IMG, &CGraphicsProjectDlg::OnBnClickedBtLoadImg)
 	ON_BN_CLICKED(ID_BTN_CONV_IMG, &CGraphicsProjectDlg::OnBnClickedBtAutoShow)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER_DENSITY, &CGraphicsProjectDlg::OnNMReleasedcaptureSliderDensity)
+	ON_BN_CLICKED(RefreshParam, &CGraphicsProjectDlg::OnBnClickedRefreshparam)
+	ON_BN_CLICKED(IDC_ViewBrushes, &CGraphicsProjectDlg::OnBnClickedViewbrushes)
+	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER_NU, &CGraphicsProjectDlg::OnNMReleasedcaptureSliderNu)
 END_MESSAGE_MAP()
 
 
-// CGraphicsProjectDlg message handlers
+//Used to initialize the
+void initSlidBarRange(CSliderCtrl * bar){
+	bar->SetRange(BarProperties::BarMin, BarProperties::BarMax);
+	bar->SetPos(BarProperties::BarInit);
+}
 
 BOOL CGraphicsProjectDlg::OnInitDialog()
 {
@@ -115,8 +131,14 @@ BOOL CGraphicsProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-    
-
+	initSlidBarRange(&BarDensity);
+	initSlidBarRange(&BarNonUnif);
+	initSlidBarRange(&BarLocalIsotropy);
+	initSlidBarRange(&BarSizeContrast);
+	initSlidBarRange(&BarCoarseness);
+	initSlidBarRange(&BarLightness);
+	initSlidBarRange(&BarChroma);
+	initSlidBarRange(&BarHue);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -200,7 +222,8 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 		}
 		Images.setOriginalImage(OrgImg);
 		State.imgData = &Images;
-		
+
+		Images.visImageData();
 	}
 }
 
@@ -212,125 +235,61 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	UpdateWindow();
 	
 	State.updateState(Params);
-	//visualize the final results:
-	//placeBrush(refImg, refStrokes);
-
-
-	
-
-
-	//if (globalImg.empty()){
-	//	AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
-	//	return;
-	//}
-
-	//cv::Mat refImg = globalImg.clone();
-
-
-
-	////////////////////////////////////////////////////////////////////////
-	/////////////// Compute super pixels for potential segmentation ////////
-	////////////////////////////////////////////////////////////////////////
-	//SLICSuperpixel slic(refImg, 10);
-	//slic.generateSuperPixels();
-	//Mat segMask = slic.getClustersIndex();
-	//Mat segMaskShow = slic.recolor();
-	//cv::namedWindow("Segmentation", 0);
-	//cv::imshow("Segmentation", segMaskShow);
-
-
-
-	////////////////////////////////////////////////////////////////////////
-	/////////////// Compute Image Saliencies ////////
-	////////////////////////////////////////////////////////////////////////
-	//cv::Mat salImg;
-	//if (!z_Saliency(refImg, salImg)){
-	//	AfxMessageBox(_T("Not Image to Process!"), MB_OK | MB_ICONSTOP);
-	//	return;
-	//}
-	//cv::namedWindow("Saliency", 0);
-	//cv::imshow("Saliency", salImg);
-
-
-
-	// non-uniformly sample on outputImg 
-	// idea. for each grid of sized 20 by 20; we assign a fixed number based on ratio.
-	//std::vector<cv::Point2i>pointList = z_strokeSampling(salImg);
-	//vis_StrokePositions(refImg, pointList);
-	//imgStats outputImgStats(refImg);
-	//outputImgStats.getGradients();
-
-	// create stroke structure. myStrokes 
-	//std::vector<myStroke>  refStrokes;
-	//for (int i = 0; i < pointList.size(); i++){
-	//	myStroke tmp;
-	//	tmp.stroke_location = pointList.at(i);
-	//	tmp.stroke_grad = cv::Point2d(outputImgStats.grad_x.at<double>(tmp.stroke_location.y, tmp.stroke_location.x), outputImgStats.grad_y.at<double>(tmp.stroke_location.y, tmp.stroke_location.x));
-	//	tmp.stroke_grad_orientation = outputImgStats.grad_orientation_in_degree.at<double>(tmp.stroke_location.y, tmp.stroke_location.x);
-	//	refStrokes.push_back(tmp);
-	//}
-
-
-	//connectStrokeGraph(refStrokes, segMask);
-	//cv::Mat vis_init_stroke_graph = vis_StrokeAll(refImg, refStrokes);
-
-
-	//cv::namedWindow("initial stroke graph", 0);
-	//cv::imshow("initial stroke graph", vis_init_stroke_graph);
-	////update orientation using reaction diffusion:
-
-	//updateOrientation(refStrokes);
-
-	//connectStrokeGraph(refStrokes, segMask);
-	////re-initialize the stroke graph after iteration
-
-	//cv::Mat vis_1stiter_stroke_graph = vis_StrokeAll(refImg, refStrokes);
-	//cv::namedWindow("updated stroke graph", 0);
-	//cv::imshow("updated stroke graph", vis_1stiter_stroke_graph);
-	//initStrokeSize(refStrokes, salImg);
-	//updateSize(refStrokes);
-	//initStrokeColor(refStrokes, refImg);
-
-	////t_LCHColorSpace(refStrokes);
-
-	//updateColor(refStrokes);
-
-	//// draw the image out ...
-	//placeBrush(refImg, refStrokes);
-
-	//cv::namedWindow("results", 0);
-	//cv::imshow("results", refImg);
-
-
-
-
-
-
-
-
-
-	//// TODO: This is used to dock everything into the frame
-	//if (firstTimer_renderView) {
-
-	//	cv::namedWindow("IDC_RND_IMSHOW", 0);
-	//	cv::resizeWindow("IDC_RND_IMSHOW", pcWidth, pcHeight);
-
-	//	HWND hWnd = (HWND)cvGetWindowHandle("IDC_RND_IMSHOW");
-	//	HWND hParent = ::GetParent(hWnd);
-	//	::SetParent(hWnd, RenderImgPC->m_hWnd);
-	//	::ShowWindow(hParent, SW_HIDE);
-	//	firstTimer_renderView = false;
-	//}
-
-
-	//cv::imshow("IDC_RND_IMSHOW", salImg); 
+	State.visFinalResults();
 
 }
 
-//Pop Up the Paramter Setting Dialog
-//void CGraphicsProjectDlg::OnBnClickedParampanpopup()
-//{
-//	// TODO: Add your control notification handler code here
-//	ParamSetting psDialg;
-//	psDialg.DoModal();
-//}
+
+
+
+
+void CGraphicsProjectDlg::OnBnClickedRefreshparam()
+{
+	//// TODO: Add your control notification handler code here
+	//Params.mDensity=cvtRange( BarDensity.GetPos()   ;
+	//Params.mNon_Uniformity = BarDensity.GetPos();
+
+	Params.mLocal_Iostropy =cvtRange( BarLocalIsotropy.GetPos(),LocalIostropy::Scale,LocalIostropy::Offset);
+	Params.mCoarseness =  cvtRange(   BarLocalIsotropy.GetPos(),Coarseness::Scale,Coarseness::Offset);
+	Params.mSize_Contrast =  cvtRange(  BarSizeContrast.GetPos(),SizeContrast::Scale,SizeContrast::Offset);
+	Params.mLightness_Contrast = cvtRange(  BarLightness.GetPos(),LightnessContrast::Scale,LightnessContrast::Offset);
+	Params.mChroma_Constrast = cvtRange(    BarChroma.GetPos(),ChromaContrast::Scale,ChromaContrast::Offset);
+	Params.mHue_Constrast =  cvtRange(BarHue.GetPos(),  HueContrast::Scale,HueContrast::Offset);
+	State.updateState(Params);
+	State.visFinalResults();
+}
+
+
+void CGraphicsProjectDlg::OnBnClickedViewbrushes()
+{
+	// TODO: Add your control notification handler code here
+	myBrushes BrushVis;
+	BrushVis.visMyBrushes();
+}
+
+void CGraphicsProjectDlg::OnNMReleasedcaptureSliderDensity(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	Params.mDensity = cvtRange(BarDensity.GetRangeMax()- BarDensity.GetPos(), Density::Scale, Density::Offset);
+	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
+	State.clearStrokeList();
+	NUS_Weibull(State.imgData->SaliencyImage, &(State.StrokeList), Params.mDensity, Params.mNon_Uniformity);
+	//initStrokeOrientation(State.StrokeList, State.imgData->GradientOrientation);
+	State.visStrokePosition();
+	State.updatePramsOnly(Params);
+
+}
+void CGraphicsProjectDlg::OnNMReleasedcaptureSliderNu(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
+	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
+	State.clearStrokeList();
+	NUS_Weibull(State.imgData->SaliencyImage, &(State.StrokeList), Params.mDensity, Params.mNon_Uniformity);
+	//initStrokeOrientation(State.StrokeList, State.imgData->GradientOrientation);
+	State.visStrokePosition();
+	State.updatePramsOnly(Params);
+}

@@ -27,24 +27,24 @@ void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList)
 		
 
 
-		//change size:
-		if (curStroke->StrokeScale(0)<1)
+		////change size:
+		if (curStroke->StrokeScale(0) < 1)
 		{
-			curStroke->StrokeScale(0) = 30;
+			curStroke->StrokeScale(0) = 1;
 		}
 		if (curStroke->StrokeScale(1) < 1)
 		{
 			curStroke->StrokeScale(1) = 10;
 		}
 
-		cv::resize(brushModel, brushModel, cv::Size((int)(curStroke->StrokeScale(1)), (int)(curStroke->StrokeScale(0))));
+		cv::resize(brushModel, brushModel, cv::Size((int)(curStroke->StrokeScale(1)*Coarseness::minSize), (int)(curStroke->StrokeScale(0)*Coarseness::minSize )));
 
 
 		//rotate by an angle:
 		cv::Point2i brushCenter((int)brushModel.cols / 2, (int)brushModel.rows / 2);
 		cv::Mat rot = cv::getRotationMatrix2D(brushCenter, curStroke->GradientOrientation * 180 / PI, 1.0);
 
-		cv::Rect bbox = cv::RotatedRect(brushCenter, brushModel.size(), curStroke->GradientOrientation * 180 / PI).boundingRect();
+		cv::Rect bbox = cv::RotatedRect(brushCenter, brushModel.size(),(float) (curStroke->GradientOrientation * 180 / PI)).boundingRect();
 
 		rot.at<double>(0, 2) += bbox.width / 2.0 - brushCenter.x;
 		rot.at<double>(1, 2) += bbox.height / 2.0 - brushCenter.y;

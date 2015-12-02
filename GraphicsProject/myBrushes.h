@@ -13,7 +13,7 @@ public:
 
 	myBrushes();
 	std::vector<cv::Mat> brushList;
-	void visBrushes();
+	void visMyBrushes();
 protected:
 private:
 };

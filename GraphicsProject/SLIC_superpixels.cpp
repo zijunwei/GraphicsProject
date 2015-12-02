@@ -312,3 +312,38 @@ Mat SLICSuperpixel::recolor() {
 
 	return temp;
 }
+
+cv::Mat SLICSuperpixel::recolor2(cv::Mat input)
+{
+	Mat temp = input.clone();
+
+	vector<Vec3f> colors(centers.size());
+
+	/* Accumulate the colors for each cluster */
+	for (int y = 0; y < temp.rows; y++) {
+		int * clusters_ptr = clusters.ptr<int>(y);
+		Vec3b * ptr = temp.ptr<Vec3b>(y);
+
+		for (int x = 0; x < temp.cols; x++)
+			colors[clusters_ptr[x]] += ptr[x];
+	}
+
+	/* Get the average of the colors */
+	for (int i = 0; i < (colors.size()); i = i + 1) {
+		colors[i] /= centerCounts[i];
+	};
+
+	/* Recolor the original CIELab image with the average color for each clusters */
+	for (int y = 0; y < temp.rows; y = y + 1) {
+		Vec3b * ptr = temp.ptr<Vec3b>(y);
+		int * clusters_ptr = clusters.ptr<int>(y);
+
+		for (int x = 0; x < temp.cols; x++) {
+			int cluster_index = clusters_ptr[x];
+			Vec3b color = colors[cluster_index];
+			ptr[x] = Vec3b(color[0], color[1], color[2]);
+		}
+	};
+
+	return temp;
+}

@@ -235,6 +235,7 @@
     </ClCompile>
     <ClCompile Include="strokeProcess.cpp" />
     <ClCompile Include="StrokeProcessState.cpp" />
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="vis.cpp" />
     <ClCompile Include="computeSaliency.cpp" />
     <ClCompile Include="z_strokeSampling.cpp" />

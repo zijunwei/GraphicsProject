@@ -3,10 +3,12 @@
 #include "NUS.h"
 #include "strokeProcess.h"
 #include "vis.h"
+#include "utils.h"
+#include "painting.h"
 StrokeProcessState::StrokeProcessState()
 {
 	this->curParam = ParamBox(-1, -1, -1, -1, -1, -1, -1, -1);
-
+	
 }
 
 
@@ -19,16 +21,20 @@ void StrokeProcessState::updateState(ParamBox input)
 	this->prevParam = curParam;
 	this->curParam = input;
 	//Compare the difference between curParam and prevParam, then update according to the changes
-	bool laterUpdate_graph = false,laterUpdate_size=false;
-	if ( (curParam.mDensity!=prevParam.mDensity) || curParam.mNon_Uniformity!=prevParam.mNon_Uniformity ) //re-update the saliency sampling-> initial connection graph
+	
+	if (this->StrokeList.empty())
+	{		NUS_Weibull(this->imgData->SaliencyImage, & (this->StrokeList), this->curParam.mDensity,this->curParam.mNon_Uniformity);
+
+	}
+
+	if (laterUpdate_graph) //re-update the saliency sampling-> initial connection graph
 	{
-		NUS_Weibull(this->imgData->SaliencyImage, & (this->StrokeList), & (this->curParam));
+		//NUS_Weibull(this->imgData->SaliencyImage, & (this->StrokeList), this->curParam.mDensity,this->curParam.mNon_Uniformity);
 		initStrokeOrientation(StrokeList, this->imgData->GradientOrientation);
 		connectStrokeGraph(StrokeList, this->imgData->SegmentImage);
-		initStrokeColor(StrokeList, this->imgData->OriginalImage);
 		//Debug use ...Show Image
-		vis_StrokePositions(this->imgData->OriginalImage, this->StrokeList);
-		laterUpdate_graph = true;
+		//vis_StrokePositions(this->imgData->OriginalImage, this->StrokeList);
+		
 	}
 	
 	if (curParam.mLocal_Iostropy != prevParam.mLocal_Iostropy || laterUpdate_graph) // update connection graph
@@ -47,8 +53,14 @@ void StrokeProcessState::updateState(ParamBox input)
 		updateSize(StrokeList, this->curParam.mSize_Contrast);
 	}
 
-	if (curParam.mHue_Constrast != prevParam.mHue_Constrast ||laterUpdate_graph ) //update the three color channels separately
+	if (laterUpdate_graph || laterUpdate_size)
 	{
+		initStrokeColor(StrokeList, this->imgData->OriginalImage);   
+
+	}
+
+	if (curParam.mHue_Constrast != prevParam.mHue_Constrast ||laterUpdate_graph ) //update the three color channels separately
+	{  
 		updateHue(StrokeList,curParam.mHue_Constrast);
 	}
 
@@ -64,4 +76,37 @@ void StrokeProcessState::updateState(ParamBox input)
 
 
 
+}
+
+void StrokeProcessState::clearStrokeList()
+{
+	if (! this->StrokeList.empty())
+	{
+		this->StrokeList.clear();
+	}
+}
+
+void StrokeProcessState::visStrokePosition()
+{
+	cv::Mat outputImg = this->imgData->OriginalImage.clone();
+	for (int i = 0; i < StrokeList.size(); i++){
+		cv::circle(outputImg, StrokeList.at(i).StrokeLocation, 1, cv::Scalar(0,0,255),3);
+	}
+	ShowSingleImage(WindowsPropertyRsltImage::CaptionStrokePositions, outputImg, WindowsPropertyRsltImage::ColOffset, WindowsPropertyRsltImage::RowOffset);
+}
+
+void StrokeProcessState::visFinalResults()
+{
+	cv::Mat PaintedImage = this->imgData->OriginalImage.clone();
+	placeBrush(PaintedImage,this->StrokeList);
+	ShowSingleImage(WindowsPropertyRsltImage::CaptionRstl, PaintedImage, WindowsPropertyRsltImage::ColOffset,
+		WindowsPropertyRsltImage::RowOffset+PaintedImage.rows);
+
+}
+
+void StrokeProcessState::updatePramsOnly(ParamBox newParam)
+{
+	this->prevParam = this->curParam;
+	this->curParam = newParam;
+	laterUpdate_graph = true;
 }

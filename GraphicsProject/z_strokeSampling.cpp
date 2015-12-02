@@ -7,7 +7,7 @@ std::vector<cv::Point2i> z_strokeSampling(cv::Mat image){
 	cv::Size inputImgSz = image.size();
 	//Size gridMapSz =  inputImgSz   / gridSz + Size(1, 1) ;
 	//cv::Size gridMapSz = inputImgSz / gridSz + Size(1, 1);
-	cv::Size gridMapSz = cv::Size(  ceil( inputImgSz.width/gridSz) ,ceil(inputImgSz.height/gridSz)  );
+	cv::Size gridMapSz = cv::Size(  (int)ceil  ( (int)(inputImgSz.width)/(int)gridSz) ,(int)ceil( (int) (inputImgSz.height)/(int)gridSz)  );
 
 
 	cv::Mat gridMap;

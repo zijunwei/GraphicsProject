@@ -6,6 +6,7 @@ public:
 	ImageData();
 	~ImageData();
 	BOOL setOriginalImage(cv::Mat );
+	void visImageData();
 public :
 	cv::Mat OriginalImage;
 	cv::Mat SaliencyImage;

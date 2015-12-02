@@ -41,6 +41,7 @@ public:
 	int getM();
 
 	Mat recolor();
+	Mat recolor2(cv::Mat input);
 	Mat getClustersIndex();
 	vector<ColorRep> getCenters();
 	vector<Point2i> getClusterCenters();

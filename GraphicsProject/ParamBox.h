@@ -11,7 +11,7 @@ public:
 	double mDensity=0.5;                 // number of strokes in z_strokeSampling function
 	double mNon_Uniformity=0.5;          // controls the z_strokeSampling part ... saliency vs number of strokes 
 	double mLocal_Iostropy=0.005;
-	double mCoarseness=0.1;                // initial size = coarseness * original size(300 by 100 in our case )
+	double mCoarseness=1;                // initial size = coarseness * original size(300 by 100 in our case )
 	double mSize_Contrast=0.005;
 	double mLightness_Contrast=0.005;
 	double mChroma_Constrast=0.005;
