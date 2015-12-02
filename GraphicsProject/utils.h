@@ -52,12 +52,12 @@ namespace WindowsPropertyRsltImage{
 double cvtRange(int barVal, double Scale, double Offset);
 
 namespace Density{
-	static double Scale = 0.01;
+	static double Scale = 0.02;
 	static double Offset = 0;
 }
 namespace Non_uniformity{
-	static double Scale = 0.05;
-	static double Offset = 0;
+	static double Scale = 0.02;
+	static double Offset = 1;
 }
 
 
@@ -65,7 +65,7 @@ namespace Coarseness{
 	static double minSize = 5;
 	static double maxScale = 10;
 	static double minScale = 1;
-	static double Scale = 0.02;
+	static double Scale = 0.05;
 	static double Offset = 1;
 
 }
@@ -84,16 +84,16 @@ namespace SizeContrast{
 
 namespace HueContrast{
 
-	static double Scale = 0.0001;
+	static double Scale = 0.01;
 	static double Offset = 0;
 }
 
 namespace ChromaContrast{
-	static double Scale = 0.0001;
+	static double Scale = 0.01;
 	static double Offset = 0;
 }
 namespace LightnessContrast{
-	static double Scale = 0.0001;
+	static double Scale = 0.01;
 	static double Offset = 0;
 }
 

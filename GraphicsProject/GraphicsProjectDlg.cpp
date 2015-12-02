@@ -236,6 +236,7 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	
 	State.updateState(Params);
 	State.visFinalResults();
+	AfxMessageBox(_T("Done!"), MB_OK | MB_ICONSTOP);
 
 }
 
@@ -257,6 +258,7 @@ void CGraphicsProjectDlg::OnBnClickedRefreshparam()
 	Params.mHue_Constrast =  cvtRange(BarHue.GetPos(),  HueContrast::Scale,HueContrast::Offset);
 	State.updateState(Params);
 	State.visFinalResults();
+	AfxMessageBox(_T("Done!"), MB_OK | MB_ICONSTOP);
 }
 
 

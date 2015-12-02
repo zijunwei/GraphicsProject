@@ -41,24 +41,35 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, doubl
 		{
 			float s = SaliencyImage.at<float>(j, i);
 			SampleProb.at<float>(j, i) = (float)(1 - exp(-pow((s / mDensity), mNon_Uniformity)));
-			sum_s += (float)(1 - exp(-pow((s / mDensity), mNon_Uniformity)));
+			sum_s += (float)(1 - exp(-pow((s), mNon_Uniformity)));
 		}
+		
 	}
 	//create stroke map on first run, if 
-	sum_s /= (SaliencyImage.rows*SaliencyImage.cols );
+	//sum_s /= (SaliencyImage.rows*SaliencyImage.cols );
 	std::vector<float>SaliencyScores;
 	for (int i = 0; i < SampleProb.cols; i+=2)
 	{
 		for (int j = 0; j < SampleProb.rows; j+=2)
 		{
-			float s = (float)(sum_s * (rand() / (float)RAND_MAX +1)/2 );
+			float s =     (float)( (rand() / (float)RAND_MAX )/2 );
+			s = (float)(1 - exp(-s));
 			if (SampleProb.at<float>(j, i)>s)
 			{
 				myStroke tmpStroke;
 				tmpStroke.StrokeLocation = cv::Point2i(i, j);
 				StrokeList->push_back(tmpStroke);
 				SaliencyScores.push_back(SampleProb.at<float>(j, i));
+				
 			}
+			/*if ( i% (int) (Coarseness::minSize*2) && j% (int) (Coarseness::minSize*2))
+			{
+				myStroke tmpStroke;
+				tmpStroke.StrokeLocation = cv::Point2i(i, j);
+				StrokeList->push_back(tmpStroke);
+				SaliencyScores.push_back(SampleProb.at<float>(j, i));
+			}*/
+
 
 		}
 	}
