@@ -126,28 +126,19 @@ void initStrokeSize(const cv::Mat  & saliencyImage, const cv::Mat & gradientRati
 	}
 
 
+	maxSaliency = pow(maxSaliency,0.5);
 	for (int i = 0; i < StrokeList.size(); i++)
 	{
 
-		double dx, dy;
-		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) <= 1)
-		{
-			dx = 1 / gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
-			dy = 1;
-		}
-		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) > 1)
-		{
-			dx = 1;
-			dy = 1 * gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
-		}
-
+		
 		double curSaliency =(double) saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
-		if (curSaliency < 0.01)
-		{
-			curSaliency = 0.01;
-		}
-		dx  *=  maxSaliency / curSaliency;
-		dy  *= maxSaliency / curSaliency;
+
+		curSaliency = pow(curSaliency, 0.5);
+
+		double dx = 1;
+		double dy = 4;
+		 dx *=  maxSaliency / curSaliency;
+		 dy *=  maxSaliency / curSaliency ;
 		//Set the constraint
 		if (dx > Coarseness::maxScale) {dx = Coarseness::maxScale; }
 		if (dy > Coarseness::maxScale) {dy = Coarseness::maxScale; }
@@ -159,6 +150,63 @@ void initStrokeSize(const cv::Mat  & saliencyImage, const cv::Mat & gradientRati
 	//Debug to find the max and min
 	minSaliency = 0;
 }
+
+
+//void initStrokeSize(const cv::Mat  & saliencyImage, const cv::Mat & gradientRatio, std::vector<myStroke> & StrokeList, double mCoarseness)
+//{
+//	float minSaliency = 100;
+//	float maxSaliency = 0;
+//	//for debug use, try to find max saliency.
+//
+//	//first of all decide the minimal size would be (10,30);
+//	for (int i = 0; i < StrokeList.size(); i++)
+//	{
+//		float unitSaliency = saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+//		if ((unitSaliency) < minSaliency)
+//		{
+//			minSaliency = (unitSaliency);
+//		}
+//		if (unitSaliency>maxSaliency)
+//		{
+//			maxSaliency = unitSaliency;
+//		}
+//	}
+//
+//
+//	for (int i = 0; i < StrokeList.size(); i++)
+//	{
+//
+//		double dx, dy;
+//		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) <= 1)
+//		{
+//			dy = 1 / gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) * 2;
+//			dx = 1;
+//		}
+//		if (gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) > 1)
+//		{
+//			dy = 1;
+//			dx = 1 * gradientRatio.at<double>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x) * 2;
+//		}
+//
+//		double curSaliency = (double)saliencyImage.at<float>(StrokeList.at(i).StrokeLocation.y, StrokeList.at(i).StrokeLocation.x);
+//
+//		if (curSaliency < 0.01)
+//		{
+//			curSaliency = 0.01;
+//		}
+//		dx *= maxSaliency / curSaliency;
+//		dy *= maxSaliency / curSaliency;
+//		//Set the constraint
+//		if (dx > Coarseness::maxScale) { dx = Coarseness::maxScale; }
+//		if (dy > Coarseness::maxScale) { dy = Coarseness::maxScale; }
+//
+//		float x = (float)dx;
+//		float y = (float)dy;
+//		StrokeList.at(i).StrokeScale = cv::Vec2f(x, y)*mCoarseness;
+//	}
+//	//Debug to find the max and min
+//	minSaliency = 0;
+//}
 
 void initStrokeColor(std::vector <myStroke> & StrokeList, cv::Mat refImg){
 	for (int i = 0; i < StrokeList.size(); i++)
@@ -289,22 +337,22 @@ void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 	// refine StrokeSize to be in range [minBrushScale, maxBrushScale]
 	for (int i = 0; i < myStrokes.size(); i++)
 	{
-		if (myStrokes.at(i).StrokeScale(0)>MaxBrushScale)
+		if (myStrokes.at(i).StrokeScale(0)>Coarseness::maxScale)
 		{
-			myStrokes.at(i).StrokeScale(0) = MaxBrushScale;
+			myStrokes.at(i).StrokeScale(0) = Coarseness::maxScale;
 		}
-		if (myStrokes.at(i).StrokeScale(0) < MinBrushScale)
+		if (myStrokes.at(i).StrokeScale(0) < Coarseness::minScale)
 		{
-			myStrokes.at(i).StrokeScale(0) = MinBrushScale;
+			myStrokes.at(i).StrokeScale(0) = Coarseness::minScale;
 		}
 
-		if (myStrokes.at(i).StrokeScale(1)>MaxBrushScale)
+		if (myStrokes.at(i).StrokeScale(1)>Coarseness::maxScale)
 		{
-			myStrokes.at(i).StrokeScale(1) = MaxBrushScale;
+			myStrokes.at(i).StrokeScale(1) = Coarseness::maxScale;
 		}
-		if (myStrokes.at(i).StrokeScale(1) < MinBrushScale)
+		if (myStrokes.at(i).StrokeScale(1) < Coarseness::minScale)
 		{
-			myStrokes.at(i).StrokeScale(1) = MinBrushScale;
+			myStrokes.at(i).StrokeScale(1) = Coarseness::minScale;
 		}
 	}
 

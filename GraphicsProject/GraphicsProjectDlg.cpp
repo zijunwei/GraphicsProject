@@ -227,6 +227,19 @@ void CGraphicsProjectDlg::OnBnClickedBtLoadImg()
 	}
 }
 
+
+
+//no image loaded warning
+bool  IsImageLoaded(StrokeProcessState chkImage){
+
+	if (!chkImage.imgData)
+	{
+		AfxMessageBox(_T("Image Not Loaded!"), MB_OK | MB_ICONSTOP);
+		return false;
+	}
+	return true;
+}
+
 // Btn Click event on AutoShow
 void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 {
@@ -234,9 +247,22 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	Invalidate();
 	UpdateWindow();
 	
+	if (  !IsImageLoaded(State))
+	{
+		return;
+	}
+	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
+	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
+	Params.mLocal_Iostropy = cvtRange(BarLocalIsotropy.GetPos(), LocalIostropy::Scale, LocalIostropy::Offset);
+	Params.mCoarseness = cvtRange(BarLocalIsotropy.GetPos(), Coarseness::Scale, Coarseness::Offset);
+	Params.mSize_Contrast = cvtRange(BarSizeContrast.GetPos(), SizeContrast::Scale, SizeContrast::Offset);
+	Params.mLightness_Contrast = cvtRange(BarLightness.GetPos(), LightnessContrast::Scale, LightnessContrast::Offset);
+	Params.mChroma_Constrast = cvtRange(BarChroma.GetPos(), ChromaContrast::Scale, ChromaContrast::Offset);
+	Params.mHue_Constrast = cvtRange(BarHue.GetPos(), HueContrast::Scale, HueContrast::Offset);
+
 	State.updateState(Params);
 	State.visFinalResults();
-	AfxMessageBox(_T("Done!"), MB_OK | MB_ICONSTOP);
+	AfxMessageBox(_T("Done!"), MB_OK );
 
 }
 
@@ -247,9 +273,13 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 void CGraphicsProjectDlg::OnBnClickedRefreshparam()
 {
 	//// TODO: Add your control notification handler code here
-	//Params.mDensity=cvtRange( BarDensity.GetPos()   ;
-	//Params.mNon_Uniformity = BarDensity.GetPos();
-
+	
+	if (!IsImageLoaded(State))
+	{
+		return;
+	}
+	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
+	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
 	Params.mLocal_Iostropy =cvtRange( BarLocalIsotropy.GetPos(),LocalIostropy::Scale,LocalIostropy::Offset);
 	Params.mCoarseness =  cvtRange(   BarLocalIsotropy.GetPos(),Coarseness::Scale,Coarseness::Offset);
 	Params.mSize_Contrast =  cvtRange(  BarSizeContrast.GetPos(),SizeContrast::Scale,SizeContrast::Offset);
@@ -258,7 +288,7 @@ void CGraphicsProjectDlg::OnBnClickedRefreshparam()
 	Params.mHue_Constrast =  cvtRange(BarHue.GetPos(),  HueContrast::Scale,HueContrast::Offset);
 	State.updateState(Params);
 	State.visFinalResults();
-	AfxMessageBox(_T("Done!"), MB_OK | MB_ICONSTOP);
+	AfxMessageBox(_T("Done!"), MB_OK );
 }
 
 
@@ -273,9 +303,14 @@ void CGraphicsProjectDlg::OnNMReleasedcaptureSliderDensity(NMHDR *pNMHDR, LRESUL
 {
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
+	
 
-	Params.mDensity = cvtRange(BarDensity.GetRangeMax()- BarDensity.GetPos(), Density::Scale, Density::Offset);
+	Params.mDensity = cvtRange( BarDensity.GetPos(), Density::Scale, Density::Offset);
 	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
+	if (!IsImageLoaded(State))
+	{
+		return;
+	}
 	State.clearStrokeList();
 	NUS_Weibull(State.imgData->SaliencyImage, &(State.StrokeList), Params.mDensity, Params.mNon_Uniformity);
 	//initStrokeOrientation(State.StrokeList, State.imgData->GradientOrientation);
@@ -287,8 +322,14 @@ void CGraphicsProjectDlg::OnNMReleasedcaptureSliderNu(NMHDR *pNMHDR, LRESULT *pR
 {
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
+	
+
 	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
 	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
+	if (!IsImageLoaded(State))
+	{
+		return;
+	}
 	State.clearStrokeList();
 	NUS_Weibull(State.imgData->SaliencyImage, &(State.StrokeList), Params.mDensity, Params.mNon_Uniformity);
 	//initStrokeOrientation(State.StrokeList, State.imgData->GradientOrientation);

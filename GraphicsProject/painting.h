@@ -28,7 +28,7 @@
 	
 
 
-	void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList);
+	void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList, cv::Mat Segmentation);
 	
 	//// hertzman's method 
 	//std::list<brushParams> getBrushParams(const cv::Mat img, const cv::Mat canvans, cv::Point2i gridSize);

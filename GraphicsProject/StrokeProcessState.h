@@ -16,7 +16,7 @@ public:
 public:
 	ParamBox curParam;
 	ParamBox prevParam;
-	ImageData * imgData;
+	ImageData * imgData=NULL;
 	std::vector<myStroke> StrokeList;
 	bool laterUpdate_graph = false;
 	bool laterUpdate_size = false;

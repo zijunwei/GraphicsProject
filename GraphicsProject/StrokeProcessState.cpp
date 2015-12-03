@@ -98,10 +98,12 @@ void StrokeProcessState::visStrokePosition()
 void StrokeProcessState::visFinalResults()
 {
 	cv::Mat PaintedImage = this->imgData->OriginalImage.clone();
-	placeBrush(PaintedImage,this->StrokeList);
+	placeBrush(PaintedImage,this->StrokeList, this->imgData->SegmentImage);
+	cv::resize(PaintedImage, PaintedImage, PaintedImage.size()*2);
 	ShowSingleImage(WindowsPropertyRsltImage::CaptionRstl, PaintedImage, WindowsPropertyRsltImage::ColOffset,
 		WindowsPropertyRsltImage::RowOffset+PaintedImage.rows);
-
+	laterUpdate_graph = false;
+	laterUpdate_size = false;
 }
 
 void StrokeProcessState::updatePramsOnly(ParamBox newParam)
