@@ -53,26 +53,34 @@ void StrokeProcessState::updateState(ParamBox input)
 		updateSize(StrokeList, this->curParam.mSize_Contrast);
 	}
 
-	if (laterUpdate_graph || laterUpdate_size)
+	/*if (laterUpdate_graph || laterUpdate_size)
 	{
-		initStrokeColor(StrokeList, this->imgData->OriginalImage);   
+	initStrokeColor(StrokeList, this->imgData->OriginalImage);
 
-	}
+	}*/
 
-	if (curParam.mHue_Constrast != prevParam.mHue_Constrast ||laterUpdate_graph ) //update the three color channels separately
-	{  
+	if (curParam.mHue_Constrast != prevParam.mHue_Constrast ||
+		curParam.mLightness_Contrast != prevParam.mLightness_Contrast||
+		curParam.mChroma_Constrast != prevParam.mChroma_Constrast||
+		laterUpdate_graph||laterUpdate_size ) //update the three color channels separately
+	{
+		initStrokeColor(StrokeList, this->imgData->OriginalImage);
 		updateHue(StrokeList,curParam.mHue_Constrast);
-	}
-
-	if (curParam.mLightness_Contrast != prevParam.mLightness_Contrast ||laterUpdate_graph) //update the three color channels separately
-	{
 		updateLightness(StrokeList, curParam.mLightness_Contrast);
+		updateChroma(StrokeList, curParam.mChroma_Constrast);
+
+
 	}
 
-	if (curParam.mChroma_Constrast != prevParam.mChroma_Constrast ||laterUpdate_graph) //update the three color channels separately
-	{
-		updateChroma(StrokeList, curParam.mChroma_Constrast);
-	}
+	//if (curParam.mLightness_Contrast != prevParam.mLightness_Contrast ||laterUpdate_graph||laterUpdate_size) //update the three color channels separately
+	//{
+	//	updateLightness(StrokeList, curParam.mLightness_Contrast);
+	//}
+
+	//if (curParam.mChroma_Constrast != prevParam.mChroma_Constrast ||laterUpdate_graph||laterUpdate_size) //update the three color channels separately
+	//{
+	//	updateChroma(StrokeList, curParam.mChroma_Constrast);
+	//}
 
 
 

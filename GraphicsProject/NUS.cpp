@@ -2,8 +2,8 @@
 #include "NUS.h"
 #include "utils.h"
 
-BOOL IfOverlap(cv::Point2i p1, cv::Point2i p2){
-	if ( pow( abs(p1.x-p2.x),2) + pow( abs(p1.y-p2.y),2)< Coarseness::minSize* Coarseness::minSize*2)
+BOOL IfOverlap(cv::Point2i p1, cv::Point2i p2, double density){
+	if ( pow( abs(p1.x-p2.x),2) + pow( abs(p1.y-p2.y),2)< Coarseness::minSize* Coarseness::minSize*density)
 	{
 		return TRUE;
 	}
@@ -43,7 +43,7 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, doubl
 
 	for (int i = 0; i < SaliencyImage.cols; i+= int(Coarseness::minSize))
 	{
-		for (int j = 0; j < SaliencyImage.rows; j+=int(Coarseness::minSize ))
+		for (int j = 0; j < SaliencyImage.rows; j+=int(Coarseness::minSize))
 		{
 			float s = SaliencyImage.at<float>(j, i);
 			//SampleProb.at<float>(j, i) = (float)(1 - exp(-pow((s/mDensity ), mNon_Uniformity)));
@@ -59,7 +59,7 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, doubl
 		for (int j = 0; j < SampleProb.rows; j += int(Coarseness::minSize ))
 		{
 			float s =  (float)( (rand() / (float)(RAND_MAX*2) )+0.5);
-			s = (float)s+ mDensity;
+			s = (float)s+mDensity;
 			if (SampleProb.at<float>(j, i)>s)
 			{
 				myStroke tmpStroke;
@@ -106,7 +106,7 @@ void NUS_Weibull(cv::Mat SaliencyImage, std::vector<myStroke> *StrokeList, doubl
 	{
 		for (size_t j = 0; j < i;j++)
 		{
-			if (IfOverlap(StrokeList->at( (i) ).StrokeLocation,StrokeList->at((j)).StrokeLocation ))
+			if (IfOverlap(StrokeList->at( (i) ).StrokeLocation,StrokeList->at((j)).StrokeLocation, 2 ))
 			{
 				StrokeList->erase(StrokeList->begin() + (i));
 				break;
