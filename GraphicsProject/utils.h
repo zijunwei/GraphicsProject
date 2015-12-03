@@ -78,7 +78,7 @@ namespace Coarseness{
 
 namespace LocalIostropy{
 
-	static double Scale = 0.01;
+	static double Scale = 0.1;
 	static double Offset = 0;
 }
 
