@@ -3,11 +3,18 @@
 
 #include <opencv2/core.hpp>
 #define PI         3.14159265358979323846
-#define NUMBER_OF_SUPERPIXELS 10
-#define HALF_STROKE_SIZE 5
-//Image Scale Range:
+#define NUMBER_OF_SUPERPIXELS 40
 
-#define MaxRation  5
+
+#define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
+#define RANDOM_RANGE         0.005          //attribute process for stroke orientation: control the range of random number
+#define N_ITERATION_ORIENTATION    20     //number of iterations for stroke process 
+
+//#define LAMBDA_SIZE               0.005    //attribute process for stroke size: size contrast
+#define N_ITERATION_SIZE          20      //number of iterations for stroke process size 
+
+//#define LAMBDA_COLOR              0.005    //attribute process for stroke size: size contrast
+#define N_ITERATION_COLOR          20      //number of iterations for stroke process size 
 
 namespace BarProperties{
 
@@ -65,7 +72,7 @@ namespace Coarseness{
 	static double maxScale = 10;
 	static double minScale = 1;
 	static double Scale = 0.01;
-	static double Offset = 0.5;
+	static double Offset = 0.2;
 
 }
 
@@ -99,18 +106,6 @@ namespace LightnessContrast{
 void ShowSingleImage(const char *caption, const cv::Mat inputImage, const int colOffset, const int rowOffset);
 ////Windows settings for results 
 
-#define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
-#define LAMBDA_THETA               0.005    //attribute process for stroke orientation: local isotropy
-#define THETA_RANDOM_RANGE         0.005    //attribute process for stroke orientation: control the range of random number
-#define N_ITERATION_ORIENTATION    0      //number of iterations for stroke process 
-
-#define LAMBDA_SIZE               0.005    //attribute process for stroke size: size contrast
-#define SIZE_RANDOM_RANGE         0.005    //attribute process for stroke size: control the range of random number for size randomness 
-#define N_ITERATION_SIZE          0      //number of iterations for stroke process size 
-
-#define LAMBDA_COLOR              0.005    //attribute process for stroke size: size contrast
-#define COLOR_RANDOM_RANGE         0.005    //attribute process for stroke size: control the range of random number for size randomness 
-#define N_ITERATION_COLOR          0      //number of iterations for stroke process size 
 
 
 #endif /* defined(UTILS_H) */

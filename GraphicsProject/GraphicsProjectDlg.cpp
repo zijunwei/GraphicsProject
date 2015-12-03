@@ -254,7 +254,7 @@ void CGraphicsProjectDlg::OnBnClickedBtAutoShow()
 	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
 	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
 	Params.mLocal_Iostropy = cvtRange(BarLocalIsotropy.GetPos(), LocalIostropy::Scale, LocalIostropy::Offset);
-	Params.mCoarseness = cvtRange(BarLocalIsotropy.GetPos(), Coarseness::Scale, Coarseness::Offset);
+	Params.mCoarseness = cvtRange(BarCoarseness.GetPos(), Coarseness::Scale, Coarseness::Offset);
 	Params.mSize_Contrast = cvtRange(BarSizeContrast.GetPos(), SizeContrast::Scale, SizeContrast::Offset);
 	Params.mLightness_Contrast = cvtRange(BarLightness.GetPos(), LightnessContrast::Scale, LightnessContrast::Offset);
 	Params.mChroma_Constrast = cvtRange(BarChroma.GetPos(), ChromaContrast::Scale, ChromaContrast::Offset);
@@ -281,14 +281,14 @@ void CGraphicsProjectDlg::OnBnClickedRefreshparam()
 	Params.mDensity = cvtRange(BarDensity.GetPos(), Density::Scale, Density::Offset);
 	Params.mNon_Uniformity = cvtRange(BarNonUnif.GetPos(), Non_uniformity::Scale, Non_uniformity::Offset);
 	Params.mLocal_Iostropy =cvtRange( BarLocalIsotropy.GetPos(),LocalIostropy::Scale,LocalIostropy::Offset);
-	Params.mCoarseness =  cvtRange(   BarLocalIsotropy.GetPos(),Coarseness::Scale,Coarseness::Offset);
+	Params.mCoarseness =  cvtRange(   BarCoarseness.GetPos(),Coarseness::Scale,Coarseness::Offset);
 	Params.mSize_Contrast =  cvtRange(  BarSizeContrast.GetPos(),SizeContrast::Scale,SizeContrast::Offset);
 	Params.mLightness_Contrast = cvtRange(  BarLightness.GetPos(),LightnessContrast::Scale,LightnessContrast::Offset);
 	Params.mChroma_Constrast = cvtRange(    BarChroma.GetPos(),ChromaContrast::Scale,ChromaContrast::Offset);
 	Params.mHue_Constrast =  cvtRange(BarHue.GetPos(),  HueContrast::Scale,HueContrast::Offset);
 	State.updateState(Params);
 	State.visFinalResults();
-	AfxMessageBox(_T("Done!"), MB_OK );
+	//AfxMessageBox(_T("Done!"), MB_OK );
 }
 
 

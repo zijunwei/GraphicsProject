@@ -8,50 +8,47 @@ SLICSuperpixel::SLICSuperpixel() {
 }
 
 SLICSuperpixel::SLICSuperpixel(Mat& src, int no_of_superpixels, int m, int max_iterations) {
-	init(src, no_of_superpixels, m, max_iterations);
-}
 
-/**
-* Initialize the clusters centers to nearest lowest gradient in 3x3 neighborhood
-* and initiliaze the values for the cluster labels and the distances
-**/
-void SLICSuperpixel::init(Mat& src, int no_of_superpixels, int m, int max_iterations) {
-	this->clear();
 
 	/* Grid interval (S) = sqrt( N / k ) */
-	this->S = int(sqrt((1.0 * src.rows * src.cols) / no_of_superpixels));
-	this->K = no_of_superpixels;
-	this->m = m;
+	this->SampleStepSize = int(sqrt((1.0 * src.rows * src.cols) / no_of_superpixels));
+	this->NumSuperpixels = no_of_superpixels;
+	this->ColorDistanceWeight = int(0.6*SampleStepSize);
 	this->maxIterations = max_iterations;
 
-	cvtColor(src, image, CV_BGR2Lab);
+	ImageRGB = src.clone();
+	cvtColor(src, ImageLab, CV_BGR2Lab);
 
 	/* Initialize cluster centers Ck and move them to the lowest gradient position in 3x3 neighborhood */
-	for (int y = S; y < image.rows - S / 2; y += S) {
-		for (int x = S; x < image.cols - S / 2; x += S) {
-			Point2i minimum = findLocalMinimum(image, Point2i(x, y));
-			Vec3b color = image.at<Vec3b>(minimum.y, minimum.x);
+	// This is problematic in 2 ways:
+	// 1. do we need to blur it?
+	// 2. how about using RGB value instead of Lab value?
+	for (int y = SampleStepSize; y < ImageLab.rows - SampleStepSize / 2; y += SampleStepSize) {
+		for (int x = SampleStepSize; x < ImageLab.cols - SampleStepSize / 2; x += SampleStepSize) {
+			Point2i minimum = findLocalMinimum(ImageLab, Point2i(x, y));
+			Vec3b color = ImageLab.at<Vec3b>(minimum.y, minimum.x);
 			centers.push_back(ColorRep(color, minimum));
 		}
 	}
 
 	/* Set labels to -1 and distances to infinity */
-	clusters = Mat(image.size(), CV_32SC1, Scalar(-1));
-	distances = Mat(image.size(), CV_64FC1, Scalar(std::numeric_limits<float>::max()));
+	clusters = Mat(ImageLab.size(), CV_32SC1, Scalar(-1));
+	distances = Mat(ImageLab.size(), CV_64FC1, Scalar(std::numeric_limits<float>::max()));
 
 	centerCounts = vector<int>(centers.size(), 0);
 }
 
+
 /**
 * Clear everything
 */
-void SLICSuperpixel::clear() {
-	centers.clear();
-	centerCounts.clear();
-
-	if (!image.empty())
-		image.release();
-}
+//void SLICSuperpixel::clear() {
+//	centers.clear();
+//	centerCounts.clear();
+//
+//	if (!ImageLab.empty())
+//		ImageLab.release();
+//}
 
 /**
 * Apply the superpixel algorithm in order to obtain cluster centers for each
@@ -63,44 +60,17 @@ void SLICSuperpixel::generateSuperPixels() {
 
 		/* Reset distances */
 		distances = Scalar(std::numeric_limits<float>::max());
-
-		///* For each cluster centers Ck */
-		//tbb::parallel_for(0, static_cast<int>(centers.size()), 1, [&](int k) {
-		//	ColorRep center = centers[k];
-
-		//	/* For each 2 x Steps region around Ck */
-		//	for (int y = center.y - S; y < center.y + S; y++){
-		//		Vec3b * ptr = image.ptr<Vec3b>(y);
-		//		int * clust_ptr = clusters.ptr<int>(y);
-		//		double * dist_ptr = distances.ptr<double>(y);
-
-		//		for (int x = center.x - S; x < center.x + S; x++){
-		//			if (withinRange(x, y)){
-		//				Vec3b color = ptr[x];
-
-		//				/* Compute and retain the smaller distance */
-		//				double distance = calcDistance(center, color, x, y);
-		//				if (distance < dist_ptr[x]) {
-		//					dist_ptr[x] = distance;
-		//					clust_ptr[x] = k;
-		//				}
-		//			}
-		//		}
-		//	}
-		//});
-
-
 		/* For each cluster centers Ck */
-		for (int k = 0; k < centers.size();k++) {
+		for (int k = 0; k < centers.size(); k++) {
 			ColorRep center = centers[k];
 
 			/* For each 2 x Steps region around Ck */
-			for (int y =(int)( center.y - S); y < center.y + S; y++){
-				Vec3b * ptr = image.ptr<Vec3b>(y);
+			for (int y = (int)(center.y - SampleStepSize); y < center.y + SampleStepSize; y++){
+				Vec3b * ptr = ImageLab.ptr<Vec3b>(y);
 				int * clust_ptr = clusters.ptr<int>(y);
 				double * dist_ptr = distances.ptr<double>(y);
 
-				for (int x = (int)(center.x - S); x < center.x + S; x++){
+				for (int x = (int)(center.x - SampleStepSize); x < center.x + SampleStepSize; x++){
 					if (withinRange(x, y)){
 						Vec3b color = ptr[x];
 
@@ -119,13 +89,13 @@ void SLICSuperpixel::generateSuperPixels() {
 		centerCounts.assign(centerCounts.size(), 0);
 
 		/* Update new cluster centers ... */
-		for (int y = 0; y < image.rows; y++) {
+		for (int y = 0; y < ImageLab.rows; y++) {
 			int * clust_ptr = clusters.ptr<int>(y);
 
-			for (int x = 0; x < image.cols; x++) {
+			for (int x = 0; x < ImageLab.cols; x++) {
 				int cluster_id = clust_ptr[x];
 				if (cluster_id > -1) {
-					Vec3b color = image.at<Vec3b>(y, x);
+					Vec3b color = ImageLab.at<Vec3b>(y, x);
 					centers[cluster_id].add(color, x, y);
 					centerCounts[cluster_id]++;
 				}
@@ -133,8 +103,8 @@ void SLICSuperpixel::generateSuperPixels() {
 		}
 
 		/* ... average them */
-		for(int i=0;i<(centers.size());i=i+1) {
-			centers[i].div((float) centerCounts[i]);
+		for (int i = 0; i < (centers.size()); i = i + 1) {
+			centers[i].div((float)centerCounts[i]);
 		}
 	}
 
@@ -151,9 +121,9 @@ vector<ColorRep> SLICSuperpixel::getCenters() {
 vector<Point2i> SLICSuperpixel::getClusterCenters() {
 	vector<Point2i> result(centers.size());
 
-	for (int i = 0; i<(centers.size()); i = i + 1) {
-		result[i].x =(int) centers[i].x;
-		result[i].y =(int) centers[i].y;
+	for (int i = 0; i < (centers.size()); i = i + 1) {
+		result[i].x = (int)centers[i].x;
+		result[i].y = (int)centers[i].y;
 	};
 
 	return result;
@@ -167,14 +137,14 @@ vector<Point2i> SLICSuperpixel::getContours() {
 	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1, 1 };
 
 	vector<vector<bool>> taken;
-	for (int y = 0; y < image.rows; y++)
-		taken.push_back(vector<bool>(image.cols, false));
+	for (int y = 0; y < ImageLab.rows; y++)
+		taken.push_back(vector<bool>(ImageLab.cols, false));
 
 	vector<Point2i> contours;
-	for (int y = 0; y < image.rows; y++){
+	for (int y = 0; y < ImageLab.rows; y++){
 		int * clust_ptr = clusters.ptr<int>(y);
 
-		for (int x = 0; x < image.cols; x++) {
+		for (int x = 0; x < ImageLab.cols; x++) {
 			int nr_p = 0;
 
 			for (int k = 0; k < 8; k++) {
@@ -206,7 +176,7 @@ vector<Point2i> SLICSuperpixel::getContours() {
 * Check if x and y are inside the image
 */
 inline bool SLICSuperpixel::withinRange(int x, int y) {
-	return x >= 0 && y >= 0 && x < image.cols && y < image.rows;
+	return x >= 0 && y >= 0 && x < ImageLab.cols && y < ImageLab.rows;
 }
 
 /**
@@ -222,7 +192,7 @@ Point2i SLICSuperpixel::findLocalMinimum(Mat& image, Point2i center) {
 			Vec3b lab_dy = image.at<Vec3b>(y + 1, x);
 			Vec3b lab_dx = image.at<Vec3b>(y, x + 1);
 
-			float diff = fabs( (float)( lab_dy[0] - lab[0])) + fabs((float)(lab_dx[0] - lab[0]));
+			float diff = fabs((float)(lab_dy[0] - lab[0])) + fabs((float)(lab_dx[0] - lab[0]));
 			if (diff < min_gradient) {
 				min_gradient = diff;
 				minimum.x = x;
@@ -248,16 +218,16 @@ double SLICSuperpixel::calcDistance(ColorRep& c, Vec3b& p, int x, int y) {
 	double d_xy = ((c.x - x) * (c.x - x)
 		+ (c.y - y) * (c.y - y));
 
-	return sqrt(d_lab + d_xy / (S * S) * (m * m));
+	return sqrt(d_lab + d_xy / (SampleStepSize * SampleStepSize) * (ColorDistanceWeight * ColorDistanceWeight));
 }
 
 
 int SLICSuperpixel::getS() {
-	return this->S;
+	return this->SampleStepSize;
 }
 
 int SLICSuperpixel::getM() {
-	return this->m;
+	return this->ColorDistanceWeight;
 }
 
 /**
@@ -273,77 +243,30 @@ Mat SLICSuperpixel::getClustersIndex() {
 * Return the CIELab color space image
 */
 Mat SLICSuperpixel::getImage() {
-	return image.clone();
+	return ImageRGB.clone();
 }
 
-/**
-* Recolor the cluster within the image, based on the average color within the cluster
-*/
-Mat SLICSuperpixel::recolor() {
-	Mat temp = image.clone();
-
-	vector<Vec3f> colors(centers.size());
-
-	/* Accumulate the colors for each cluster */
-	for (int y = 0; y < temp.rows; y++) {
-		int * clusters_ptr = clusters.ptr<int>(y);
-		Vec3b * ptr = temp.ptr<Vec3b>(y);
-
-		for (int x = 0; x < temp.cols; x++)
-			colors[clusters_ptr[x]] += ptr[x];
-	}
-
-	/* Get the average of the colors */
-	for (int i = 0; i < (colors.size());i=i+1) {
-		colors[i] /= centerCounts[i];
-	};
-
-	/* Recolor the original CIELab image with the average color for each clusters */
-	for (int y = 0; y < temp.rows;y=y+1) {
-		Vec3b * ptr = temp.ptr<Vec3b>(y);
-		int * clusters_ptr = clusters.ptr<int>(y);
-
-		for (int x = 0; x < temp.cols; x++) {
-			int cluster_index = clusters_ptr[x];
-			Vec3b color = colors[cluster_index];
-			ptr[x] = Vec3b(color[0], color[1], color[2]);
-		}
-	};
-
-	return temp;
-}
-
-cv::Mat SLICSuperpixel::recolor2(cv::Mat input)
+void SLICSuperpixel::recolor2(cv::Mat inputRGB, cv::Mat & output)
 {
-	Mat temp = input.clone();
+	output = inputRGB.clone();
 
 	vector<Vec3f> colors(centers.size());
 
-	/* Accumulate the colors for each cluster */
-	for (int y = 0; y < temp.rows; y++) {
-		int * clusters_ptr = clusters.ptr<int>(y);
-		Vec3b * ptr = temp.ptr<Vec3b>(y);
 
-		for (int x = 0; x < temp.cols; x++)
-			colors[clusters_ptr[x]] += ptr[x];
+	for (int y = 0; y < output.rows; y++) {
+		for (int x = 0; x < output.cols; x++)
+			colors[clusters.at<int>(y, x)] += output.at<Vec3b>(y, x);
 	}
-
 	/* Get the average of the colors */
 	for (int i = 0; i < (colors.size()); i = i + 1) {
 		colors[i] /= centerCounts[i];
 	};
 
-	/* Recolor the original CIELab image with the average color for each clusters */
-	for (int y = 0; y < temp.rows; y = y + 1) {
-		Vec3b * ptr = temp.ptr<Vec3b>(y);
-		int * clusters_ptr = clusters.ptr<int>(y);
+	for (int y = 0; y < output.rows; y = y + 1) {
 
-		for (int x = 0; x < temp.cols; x++) {
-			int cluster_index = clusters_ptr[x];
-			Vec3b color = colors[cluster_index];
-			ptr[x] = Vec3b(color[0], color[1], color[2]);
+		for (int x = 0; x < output.cols; x++) {
+
+			output.at<Vec3b>(y, x) = (Vec3b)colors[clusters.at<int>(y, x)];
 		}
 	};
-
-	return temp;
 }

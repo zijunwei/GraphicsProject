@@ -10,7 +10,7 @@
 using namespace std;
 using namespace cv;
 
-struct ColorRep;
+class ColorRep;
 
 class SLICSuperpixel {
 protected:
@@ -19,10 +19,11 @@ protected:
 	vector<ColorRep> centers;
 	vector<int> centerCounts;
 
-	Mat image;
-	int K;
-	int S;
-	int m;
+	Mat ImageLab;
+	Mat ImageRGB;
+	int NumSuperpixels;
+	int SampleStepSize;
+	int ColorDistanceWeight;
 	int maxIterations;
 
 	inline bool withinRange(int x, int y);
@@ -31,9 +32,9 @@ protected:
 
 public:
 	SLICSuperpixel();
-	SLICSuperpixel(Mat& src, int no_of_superpixels, int m = 10, int max_iterations = 10);
+	SLICSuperpixel(Mat& src, int no_of_superpixels, int m = 20, int max_iterations = 50);
 
-	void init(Mat& src, int no_of_superpixels, int m = 10, int max_iterations = 10);
+	void init(Mat& src, int no_of_superpixels, int m = 20, int max_iterations = 50);
 	void clear();
 	void generateSuperPixels();
 
@@ -41,7 +42,7 @@ public:
 	int getM();
 
 	Mat recolor();
-	Mat recolor2(cv::Mat input);
+	void recolor2(cv::Mat inputRGB, cv::Mat & output);
 	Mat getClustersIndex();
 	vector<ColorRep> getCenters();
 	vector<Point2i> getClusterCenters();
@@ -55,7 +56,8 @@ public:
 * color represented in LAB color space and X Y coords
 * It's a struct, well struct behaves like class
 */
-struct ColorRep{
+class ColorRep{
+public:
 	float l = 0;
 	float a = 0;
 	float b = 0;
@@ -114,11 +116,11 @@ struct ColorRep{
 			+ (this->y - other.y) * (this->y - other.y);
 	}
 
-	string toString() {
-		stringstream ss;
-		ss << l << " " << a << " " << b << " " << x << " " << y;
-		return ss.str();
-	}
+	//string toString() {
+	//	stringstream ss;
+	//	ss << l << " " << a << " " << b << " " << x << " " << y;
+	//	return ss.str();
+	//}
 };
 
 #endif /* defined(__SLIC_Superpixels__SLIC__) */

@@ -24,7 +24,7 @@ BOOL ImageData::setOriginalImage(cv::Mat inputImage)
 	SLICSuperpixel slic(OriginalImage, NUMBER_OF_SUPERPIXELS);
 	slic.generateSuperPixels();
 	this->SegmentImage = slic.getClustersIndex();
-	this->SegmentImage_color = slic.recolor2(this->OriginalImage);
+	slic.recolor2(this->OriginalImage,this->SegmentImage_color);
 	
 	//Saliency image:
 	computeSaliency(this->OriginalImage, this->SaliencyImage);
