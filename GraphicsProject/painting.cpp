@@ -80,7 +80,8 @@ void placeBrush(cv::Mat &Canvans, std::vector<myStroke> StrokeList, cv::Mat Segm
 		          {
 					  if (CanvansLocation.x - brushCenter.x + i >= 0 && CanvansLocation.y - brushCenter.y + j >= 0 &&
 						  CanvansLocation.x - brushCenter.x + i<Canvans.cols &&CanvansLocation.y - brushCenter.y + j <Canvans.rows  
-						  && Segmentation.at<int>(CanvansLocation.y - brushCenter.y + j, CanvansLocation.x - brushCenter.x + i)==SegRegion)
+						  && Segmentation.at<int>(CanvansLocation.y - brushCenter.y + j, CanvansLocation.x - brushCenter.x + i)<=SegRegion+1 &&
+						  Segmentation.at<int>(CanvansLocation.y - brushCenter.y + j, CanvansLocation.x - brushCenter.x + i) > SegRegion - 1)
 					  {
 						  Canvans.at<cv::Vec3b>(CanvansLocation.y - brushCenter.y + j, CanvansLocation.x - brushCenter.x + i) =
 							  blend_ratio* Canvans.at<cv::Vec3b>(CanvansLocation.y - brushCenter.y + j, CanvansLocation.x - brushCenter.x + i)

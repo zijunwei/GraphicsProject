@@ -192,8 +192,6 @@ void updateOrientation(std::vector<myStroke> & myStrokes, double mLocal_Iostropy
 	for (int i = 0; i < N_ITERATION; i++){
 		for (int n = 0; n < myStrokes.size(); n++){
 
-
-			//step 1 compute D(theta)
 			double D_theta = 0;
 			if (myStrokes.at(n).NeiStrokeQ1){
 				double dist = cv::norm(myStrokes.at(n).StrokeLocation - refStrokes.at(n).NeiStrokeQ1->StrokeLocation);
@@ -233,9 +231,11 @@ void updateOrientation(std::vector<myStroke> & myStrokes, double mLocal_Iostropy
 
 void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 {
-	std::vector<myStroke>  refStrokes = myStrokes;
-	for (int iStroke = 0; iStroke < myStrokes.size(); iStroke++){
-		for (int iter = 0; iter < N_ITERATION; iter++){
+
+	std::vector<myStroke>  srcStrokes = myStrokes;
+	std::vector<myStroke> refStrokes = myStrokes;
+	for (int iter = 0; iter < N_ITERATION; iter++){
+		for (int iStroke = 0; iStroke < myStrokes.size(); iStroke++){
 
 			double D_sx = 0;
 			double D_sy = 0;
@@ -243,7 +243,6 @@ void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 				double dist = cv::norm(myStrokes.at(iStroke).StrokeLocation - myStrokes.at(iStroke).NeiStrokeQ1->StrokeLocation);
 				double diff_sizex = (myStrokes.at(iStroke).NeiStrokeQ1->StrokeScale(0) - myStrokes.at(iStroke).StrokeScale(0));
 				double diff_sizey = (myStrokes.at(iStroke).NeiStrokeQ1->StrokeScale(1) - myStrokes.at(iStroke).StrokeScale(1));
-
 				D_sx += 1 / dist * diff_sizex;
 				D_sy += 1 / dist * diff_sizey;
 			}
@@ -271,8 +270,8 @@ void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 
 			double R_sx = 0;
 			double R_sy = 0;
-			R_sx = (refStrokes.at(iStroke).StrokeScale(0) - myStrokes.at(iStroke).StrokeScale(0));
-			R_sy = (refStrokes.at(iStroke).StrokeScale(1) - myStrokes.at(iStroke).StrokeScale(1));
+			R_sx = (srcStrokes.at(iStroke).StrokeScale(0) - myStrokes.at(iStroke).StrokeScale(0));
+			R_sy = (srcStrokes.at(iStroke).StrokeScale(1) - myStrokes.at(iStroke).StrokeScale(1));
 
 			double random_num_x = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 			double random_num_y = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
@@ -280,7 +279,7 @@ void updateSize(std::vector<myStroke> & myStrokes, double mSizeContrast)
 			myStrokes.at(iStroke).StrokeScale(0) = (float)(myStrokes.at(iStroke).StrokeScale(0) + R_sx + mSizeContrast * D_sx + RANDOM_RANGE* random_num_x);
 			myStrokes.at(iStroke).StrokeScale(1) = (float)(myStrokes.at(iStroke).StrokeScale(1) + R_sy + mSizeContrast * D_sy + RANDOM_RANGE* random_num_y);
 		}
-
+		refStrokes = myStrokes;
 	}
 
 	// refine StrokeSize to be in range [minBrushScale, maxBrushScale]
@@ -316,21 +315,23 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 	{
 		refLightness.push_back(StrokeList.at(i).ColorLightness);
 	}
-	for (int n = 0; n < StrokeList.size(); n++){
-		for (int i = 0; i < N_ITERATION; i++){
+	std::vector<myStroke>refStrokes = StrokeList;
+	for (int i = 0; i < N_ITERATION; i++){
+		for (int n = 0; n < StrokeList.size(); n++){
+
 
 			//step 1 compute D(theta)
 			double D_cl = 0;
 
 			if (StrokeList.at(n).NeiStrokeQ1){
-				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ1->StrokeLocation);
+				double dist = cv::norm(StrokeList.at(n).StrokeLocation - refStrokes.at(n).NeiStrokeQ1->StrokeLocation);
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ1->ColorLightness - StrokeList.at(n).ColorLightness);
 
 				D_cl += 1 / dist * diff_color_l;
 
 			}
 			if (StrokeList.at(n).NeiStrokeQ2){
-				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ2->StrokeLocation);
+				double dist = cv::norm(StrokeList.at(n).StrokeLocation - refStrokes.at(n).NeiStrokeQ2->StrokeLocation);
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ2->ColorLightness - StrokeList.at(n).ColorLightness);
 
 
@@ -339,7 +340,7 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 
 			}
 			if (StrokeList.at(n).NeiStrokeQ3){
-				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ3->StrokeLocation);
+				double dist = cv::norm(StrokeList.at(n).StrokeLocation - refStrokes.at(n).NeiStrokeQ3->StrokeLocation);
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ3->ColorLightness - StrokeList.at(n).ColorLightness);
 
 				D_cl += 1 / dist * diff_color_l;
@@ -347,29 +348,30 @@ void updateLightness(std::vector<myStroke> & StrokeList, double mLightnessContra
 
 			}
 			if (StrokeList.at(n).NeiStrokeQ4){
-				double dist = cv::norm(StrokeList.at(n).StrokeLocation - StrokeList.at(n).NeiStrokeQ4->StrokeLocation);
+				double dist = cv::norm(StrokeList.at(n).StrokeLocation - refStrokes.at(n).NeiStrokeQ4->StrokeLocation);
 				double diff_color_l = (StrokeList.at(n).NeiStrokeQ4->ColorLightness - StrokeList.at(n).ColorLightness);
 
 				D_cl += 1 / dist * diff_color_l;
 
 			}
 
-			double R_cl = 0;
-			R_cl = (refLightness.at(n) - StrokeList.at(n).ColorLightness);
+			double R_cl = (refLightness.at(n) - StrokeList.at(n).ColorLightness);
 			double StochasticNoise = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 			StrokeList.at(n).ColorLightness = StrokeList.at(n).ColorLightness + R_cl + mLightnessContrast * D_cl + RANDOM_RANGE * StochasticNoise;
 
 		}
-
+		refStrokes = StrokeList;
 	}
 }
 
 
 void updateChroma(std::vector<myStroke> & myStrokes, double mChromaContrast)
 {
-	std::vector<myStroke> refStrokes = myStrokes;
-	for (int n = 0; n < myStrokes.size(); n++){
-		for (int i = 0; i < N_ITERATION; i++){
+	std::vector<myStroke> srcStrokes = myStrokes;
+	std::vector<myStroke>  refStrokes = myStrokes;
+	for (int i = 0; i < N_ITERATION; i++){
+		for (int n = 0; n < myStrokes.size(); n++){
+
 
 			//step 1 compute D(theta)
 			double D_cl = 0;
@@ -406,22 +408,22 @@ void updateChroma(std::vector<myStroke> & myStrokes, double mChromaContrast)
 
 			}
 
-			double R_cl = 0;
-
-			R_cl = (refStrokes.at(n).ColorChroma - myStrokes.at(n).ColorChroma);
+			double R_cl = (srcStrokes.at(n).ColorChroma - myStrokes.at(n).ColorChroma);
 			double StochasticNoise = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 			myStrokes.at(n).ColorChroma = myStrokes.at(n).ColorChroma + R_cl + mChromaContrast * D_cl + RANDOM_RANGE * StochasticNoise;
 
 		}
-
+		refStrokes = myStrokes;
 	}
 }
 
 void updateHue(std::vector<myStroke> & myStrokes, double mHueContrast)
 {
+	std::vector<myStroke> srcStrokes = myStrokes;
 	std::vector<myStroke> refStrokes = myStrokes;
-	for (int n = 0; n < myStrokes.size(); n++){
-		for (int i = 0; i < N_ITERATION; i++){
+	for (int i = 0; i < N_ITERATION; i++){
+		for (int n = 0; n < myStrokes.size(); n++){
+
 
 			//step 1 compute D(theta)
 
@@ -462,10 +464,7 @@ void updateHue(std::vector<myStroke> & myStrokes, double mHueContrast)
 			}
 
 
-			double R_ch = 0;
-
-			R_ch = sin(refStrokes.at(n).ColorHue - myStrokes.at(n).ColorHue);
-
+			double R_ch = sin(srcStrokes.at(n).ColorHue - myStrokes.at(n).ColorHue);
 
 			double random_num_b = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 
@@ -473,7 +472,7 @@ void updateHue(std::vector<myStroke> & myStrokes, double mHueContrast)
 
 
 		}
-
+		refStrokes = myStrokes;
 	}
 
 }

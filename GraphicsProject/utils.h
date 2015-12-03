@@ -8,7 +8,7 @@
 
 #define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
 #define RANDOM_RANGE         0.005          //attribute process for stroke orientation: control the range of random number
-#define N_ITERATION    20     //number of iterations for stroke process 
+#define N_ITERATION    25    //number of iterations for stroke process 
 
 //#define LAMBDA_SIZE               0.005    //attribute process for stroke size: size contrast
 //#define N_ITERATION_SIZE          20      //number of iterations for stroke process size 
@@ -78,29 +78,29 @@ namespace Coarseness{
 
 namespace LocalIostropy{
 
-	static double Scale = 0.1;
-	static double Offset = 0;
+	static double Scale = 0.2;
+	static double Offset = -5;
 }
 
 namespace SizeContrast{
 
-	static double Scale = 0.0001;
-	static double Offset = 0;
+	static double Scale = 0.05;
+	static double Offset = -2;
 }
 
 namespace HueContrast{
 
-	static double Scale = 0.01;
-	static double Offset = 0;
+	static double Scale = 0.02;
+	static double Offset = -1;
 }
 
 namespace ChromaContrast{
-	static double Scale = 0.01;
-	static double Offset = 0;
+	static double Scale = 0.02;
+	static double Offset = -1;
 }
 namespace LightnessContrast{
-	static double Scale = 0.01;
-	static double Offset = 0;
+	static double Scale = 0.02;
+	static double Offset = -1;
 }
 
 void ShowSingleImage(const char *caption, const cv::Mat inputImage, const int colOffset, const int rowOffset);
