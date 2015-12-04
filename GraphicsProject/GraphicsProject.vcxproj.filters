@@ -78,6 +78,9 @@
     <ClInclude Include="NUS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mygl_ShowImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsProject.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mygl_ShowImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

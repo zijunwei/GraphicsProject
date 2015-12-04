@@ -4,17 +4,12 @@
 #include <opencv2/core.hpp>
 #define PI         3.14159265358979323846
 #define NUMBER_OF_SUPERPIXELS 40
-
+#define USE_OPENGL  1
 
 #define STROKE_DISTANCE_THRESHOLD  60       // 3.2 stroke neighborhood graph threshold 
 #define RANDOM_RANGE         0.005          //attribute process for stroke orientation: control the range of random number
 #define N_ITERATION    25    //number of iterations for stroke process 
 
-//#define LAMBDA_SIZE               0.005    //attribute process for stroke size: size contrast
-//#define N_ITERATION_SIZE          20      //number of iterations for stroke process size 
-//
-////#define LAMBDA_COLOR              0.005    //attribute process for stroke size: size contrast
-//#define N_ITERATION_COLOR          20      //number of iterations for stroke process size 
 
 namespace BarProperties{
 

@@ -84,6 +84,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <ExecutablePath>C:\Libs\freeglut\bin\x64;$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>C:\Libs\freeglut\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -177,7 +179,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(OPENCV_DIR)\build\x64\vc12\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_ts300.lib;opencv_world300.lib</AdditionalDependencies>
+      <AdditionalDependencies>opencv_ts300.lib;opencv_world300.lib;freeglut.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -199,6 +201,7 @@
     <ClInclude Include="GraphicsProjectDlg.h" />
     <ClInclude Include="ImageData.h" />
     <ClInclude Include="myBrushes.h" />
+    <ClInclude Include="mygl_ShowImage.h" />
     <ClInclude Include="myStroke.h" />
     <ClInclude Include="NUS.h" />
     <ClInclude Include="painting.h" />
@@ -221,6 +224,7 @@
     <ClCompile Include="GraphicsProjectDlg.cpp" />
     <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="myBrushes.cpp" />
+    <ClCompile Include="mygl_ShowImage.cpp" />
     <ClCompile Include="myStroke.cpp" />
     <ClCompile Include="NUS.cpp" />
     <ClCompile Include="painting.cpp" />

@@ -42,10 +42,10 @@ void ImageData::visImageData()
 	
 	ShowSingleImage(WindowPropertyDisplayImage::CaptionOriginalImage, this->OriginalImage,
 		WindowPropertyDisplayImage::ColOffset,WindowPropertyDisplayImage::RowOffset);
-	ShowSingleImage(WindowPropertyDisplayImage::CaptionSaliencyImage, this->SaliencyImage,
-		WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*2+this->OriginalImage.rows);
-	ShowSingleImage(WindowPropertyDisplayImage::CaptionSegmentationImage, this->SegmentImage_color,
-		WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*3 + this->OriginalImage.rows + this->SaliencyImage.rows);
+	//ShowSingleImage(WindowPropertyDisplayImage::CaptionSaliencyImage, this->SaliencyImage,
+	//	WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*2+this->OriginalImage.rows);
+	//ShowSingleImage(WindowPropertyDisplayImage::CaptionSegmentationImage, this->SegmentImage_color,
+	//	WindowPropertyDisplayImage::ColOffset, WindowPropertyDisplayImage::RowOffset*3 + this->OriginalImage.rows + this->SaliencyImage.rows);
 
 	
 }

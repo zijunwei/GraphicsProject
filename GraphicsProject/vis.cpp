@@ -1,14 +1,21 @@
 #include "stdafx.h"
 #include "vis.h"
-
+#include "utils.h"
+#include "mygl_ShowImage.h"
 // draw stroke points only
 void vis_StrokePositions(cv::Mat inputImages, std::vector<myStroke> StrokeList){
 	cv::Mat outputImg = inputImages.clone();
 	for (int i = 0; i < StrokeList.size(); i++){
 		cv::circle(outputImg, StrokeList.at(i).StrokeLocation, 2, 255);
 	}
-	cv::namedWindow("stroke placement", 0);
-	cv::imshow("stroke placement", outputImg);
+	if (USE_OPENGL){
+		cv::namedWindow("stroke placement", 0);
+		cv::imshow("stroke placement", outputImg);
+	}
+	else{
+		mygl_ShowImage::upDate(outputImg);
+		
+	}
 
 }
 
@@ -39,9 +46,15 @@ cv::Mat vis_StrokeAll(cv::Mat inputImage, std::vector<myStroke> myStrokes){
 		}
 	
 	}
-	return Canvas;
-	//cv::namedWindow("stroke graph", 0);
-	//cv::imshow("stroke graph", Canvas);
 
+	if (USE_OPENGL)
+	{
+		return Canvas;
+	}
+	else
+	{
+		mygl_ShowImage::upDate(Canvas);
+		return Canvas;
+	}
 
 }
